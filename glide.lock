@@ -1,0 +1,121 @@
+hash: 2e51285cca65edbbf87c0d1955848b8e81628266f5ec159b1966feb313a1163a
+updated: 2017-12-01T11:38:32.262031638+01:00
+imports:
+- name: github.com/aead/chacha20
+  version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
+  repo: https://github.com/aead/chacha20
+  subpackages:
+  - chacha
+- name: github.com/codahale/aesnicheck
+  version: 349fcc471aaccc29cd074e1275f1a494323826cd
+  repo: https://github.com/codahale/aesnicheck
+- name: github.com/flynn/go-shlex
+  version: 3f9db97f856818214da2e1057f8ad84803971cff
+  repo: https://github.com/flynn/go-shlex
+- name: github.com/hashicorp/go-syslog
+  version: 326bf4a7f709d263f964a6a96558676b103f3534
+  repo: https://github.com/hashicorp/go-syslog
+- name: github.com/hashicorp/golang-lru
+  version: 0a025b7e63adc15a622f29b0b2c4c3848243bbf6
+  repo: https://github.com/hashicorp/golang-lru
+  subpackages:
+  - simplelru
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/longsleep/go-metrics
+  version: c1943bcf904753d1e15df1aece374004792c2ac5
+  subpackages:
+  - loggedwriter
+  - timing
+- name: github.com/lucas-clemente/aes12
+  version: 25700e67be5c860bcc999137275b9ef8b65932bd
+  repo: https://github.com/lucas-clemente/aes12
+- name: github.com/lucas-clemente/fnv128a
+  version: 393af48d391698c6ae4219566bfbdfef67269997
+  repo: https://github.com/lucas-clemente/fnv128a
+- name: github.com/lucas-clemente/quic-go
+  version: a9e2a28315406f825cdfe41f8652110addeb84a5
+  repo: https://github.com/lucas-clemente/quic-go
+  subpackages:
+  - ackhandler
+  - congestion
+  - crypto
+  - flowcontrol
+  - frames
+  - h2quic
+  - handshake
+  - internal/utils
+  - protocol
+  - qerr
+- name: github.com/lucas-clemente/quic-go-certificates
+  version: d2f86524cced5186554df90d92529757d22c1cb6
+  repo: https://github.com/lucas-clemente/quic-go-certificates
+- name: github.com/mholt/caddy
+  version: c4dfbb9956095c92d0586a52723748c070c7b459
+  subpackages:
+  - caddyfile
+  - caddyhttp/httpserver
+  - caddyhttp/proxy
+  - caddyhttp/staticfiles
+  - caddytls
+- name: github.com/miekg/dns
+  version: 0f3adef2e2201d72e50309a36fc99d8a9d1a4960
+  repo: https://github.com/miekg/dns
+- name: github.com/russross/blackfriday
+  version: 067529f716f4c3f5e37c8c95ddd59df1007290ae
+  repo: https://github.com/russross/blackfriday
+- name: github.com/sirupsen/logrus
+  version: f006c2ac4710855cf0f916dd6b77acf6b048dc6e
+- name: github.com/spf13/cobra
+  version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
+- name: github.com/spf13/pflag
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+- name: github.com/xenolf/lego
+  version: 4dde48a9b9916926a8dd4f69639c8dba40930355
+  repo: https://github.com/xenolf/lego
+  subpackages:
+  - acme
+- name: golang.org/x/crypto
+  version: 2faea1465de239e4babd8f5905cc25b781712442
+  subpackages:
+  - curve25519
+  - hkdf
+  - ocsp
+  - ssh/terminal
+- name: golang.org/x/net
+  version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
+  repo: https://go.googlesource.com/net
+  subpackages:
+  - context
+  - http2
+  - http2/hpack
+  - idna
+  - lex/httplex
+  - publicsuffix
+- name: golang.org/x/sys
+  version: 833a04a10549a95dc34458c195cbad61bbb6cb4d
+  subpackages:
+  - unix
+- name: golang.org/x/text
+  version: 836efe42bb4aa16aaa17b9c155d8813d336ed720
+  repo: https://go.googlesource.com/text
+  subpackages:
+  - internal/gen
+  - internal/triegen
+  - internal/ucd
+  - secure/bidirule
+  - transform
+  - unicode/bidi
+  - unicode/cldr
+  - unicode/norm
+  - unicode/rangetable
+- name: gopkg.in/natefinch/lumberjack.v2
+  version: df99d62fd42d8b3752c8a42c6723555372c02a03
+  repo: https://gopkg.in/natefinch/lumberjack.v2
+- name: gopkg.in/square/go-jose.v1
+  version: aa2e30fdd1fe9dd3394119af66451ae790d50e0d
+  repo: https://gopkg.in/square/go-jose.v1
+  subpackages:
+  - cipher
+  - json
+testImports: []

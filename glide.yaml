@@ -1,0 +1,15 @@
+package: stash.kopano.io/kc/kopano-api
+import:
+- package: github.com/longsleep/go-metrics
+  subpackages:
+  - loggedwriter
+  - timing
+- package: github.com/sirupsen/logrus
+  version: v1.0.3
+- package: github.com/spf13/cobra
+  version: v0.0.1
+- package: github.com/mholt/caddy
+  version: v0.10.10
+  subpackages:
+  - caddyfile
+  - caddyhttp/proxy
