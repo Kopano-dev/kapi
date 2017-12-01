@@ -1,4 +1,4 @@
-# Kopanp API
+# Kopano API
 
 Kopano API provides a web service with the endpoints to interface with Kopano
 via HTTP APIs.
@@ -26,7 +26,7 @@ make
   --gc-socket-path=/run/kopano/fleet-runner
 ```
 
-Where `--gc-socke-path` points to a folder containing files ending with `.sock`.
+Where `--gc-socket-path` points to a folder containing files ending with `.sock`.
 The folder is scanned for these files on startup and uses all found `.sock` files
 as upstreams for the API proxy.
 
@@ -35,3 +35,4 @@ as upstreams for the API proxy.
 ```
 cd ~/go/src/stash.kopano.io/kc/konnect
 make test
+```
