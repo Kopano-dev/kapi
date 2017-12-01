@@ -1,5 +1,5 @@
-hash: 2e51285cca65edbbf87c0d1955848b8e81628266f5ec159b1966feb313a1163a
-updated: 2017-12-01T11:38:32.262031638+01:00
+hash: 7edd1a8bc04a5fa520196d10bf41d0aa1f7ffde8c983a1a26d38fcee0fa3fdb5
+updated: 2017-12-01T18:25:01.309809665+01:00
 imports:
 - name: github.com/aead/chacha20
   version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
@@ -9,9 +9,17 @@ imports:
 - name: github.com/codahale/aesnicheck
   version: 349fcc471aaccc29cd074e1275f1a494323826cd
   repo: https://github.com/codahale/aesnicheck
+- name: github.com/dgrijalva/jwt-go
+  version: dbeaa9332f19a944acb5736b4456cfcc02140e29
 - name: github.com/flynn/go-shlex
   version: 3f9db97f856818214da2e1057f8ad84803971cff
   repo: https://github.com/flynn/go-shlex
+- name: github.com/google/go-querystring
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  subpackages:
+  - query
+- name: github.com/gorilla/schema
+  version: 8b1100835db5bbdae88541510f70d114b91a7e4d
 - name: github.com/hashicorp/go-syslog
   version: 326bf4a7f709d263f964a6a96558676b103f3534
   repo: https://github.com/hashicorp/go-syslog
@@ -118,4 +126,10 @@ imports:
   subpackages:
   - cipher
   - json
+- name: stash.kopano.io/kc/konnect
+  version: 985b8a339334b1050ca715de9e733020adc562dc
+  subpackages:
+  - oidc
+  - oidc/payload
+  - utils
 testImports: []

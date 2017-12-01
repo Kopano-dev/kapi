@@ -18,8 +18,15 @@
 package server
 
 import (
+	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"net/http"
+	"strings"
+
+	"github.com/dgrijalva/jwt-go"
+	"stash.kopano.io/kc/konnect"
+	"stash.kopano.io/kc/konnect/oidc"
 )
 
 // HealthCheckHandler a http handler return 200 OK when server health is fine.
@@ -27,9 +34,72 @@ func (s *Server) HealthCheckHandler(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-// ProxyHandler is a http handler to proxy requests to workers using the
+// accessTokenRequired parses incoming bearer authentication and injects the
+// subject of the token into the request as header.
+func (s *Server) accessTokenRequired(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		var err error
+		var claims *konnect.AccessTokenClaims
+
+		// TODO(longsleep): This code should be at a central location. It can
+		// also be found in konnect.
+		auth := strings.SplitN(req.Header.Get("Authorization"), " ", 2)
+		switch auth[0] {
+		case oidc.TokenTypeBearer:
+			if len(auth) != 2 {
+				err = oidc.NewOAuth2Error(oidc.ErrorOAuth2InvalidRequest, "Invalid Bearer authorization header format")
+				break
+			}
+			claims = &konnect.AccessTokenClaims{}
+			_, err = jwt.ParseWithClaims(auth[1], claims, func(token *jwt.Token) (interface{}, error) {
+				// TODO(longsleep): validate!
+
+				return nil, errors.New("validate of tokens not implemented")
+			})
+			err = nil //XXX(longsleep): Remove me once validation is implemented.
+			if err == nil {
+				// TODO(longsleep): Validate all claims.
+				err = claims.Valid()
+			}
+			if err != nil {
+				// Wrap as OAuth2 error.
+				err = oidc.NewOAuth2Error(oidc.ErrorOAuth2InvalidToken, err.Error())
+			}
+
+		default:
+			err = oidc.NewOAuth2Error(oidc.ErrorOAuth2InvalidRequest, "Bearer authorization required")
+		}
+
+		if claims != nil && claims.IsAccessToken {
+			// Use sub
+			if userEntryIDByte, decodeErr := base64.StdEncoding.DecodeString(claims.Subject); decodeErr == nil {
+				req.Header.Set("X-Kopano-UserEntryID", hex.EncodeToString(userEntryIDByte))
+				//s.logger.WithField("UserEntryID", req.Header.Get("X-Kopano-UserEntryID")).Debugln("proxy with auth")
+			} else {
+				err = decodeErr
+			}
+		} else {
+			err = errors.New("missing access token claim")
+		}
+
+		if err != nil && req.Header.Get("X-Kopano-UserEntryID") != "" {
+			// XXX(longsleep): This allows insecure pass through of auth data. Remove this!
+			err = nil
+		}
+
+		if err != nil {
+			s.logger.WithError(err).Debugln("access token required")
+			http.Error(rw, "", http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(rw, req)
+	})
+}
+
+// handleProxy is a http handler to proxy requests to workers using the
 // accociated proxy.
-func (s *Server) ProxyHandler(rw http.ResponseWriter, req *http.Request) {
+func (s *Server) handleProxy(rw http.ResponseWriter, req *http.Request) {
 	s.mutex.RLock()
 	proxy := s.proxy
 	s.mutex.RUnlock()

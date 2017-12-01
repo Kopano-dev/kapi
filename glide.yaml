@@ -13,3 +13,7 @@ import:
   subpackages:
   - caddyfile
   - caddyhttp/proxy
+- package: stash.kopano.io/kc/konnect
+  version: ^0.2.2
+- package: github.com/dgrijalva/jwt-go
+  version: v3.1.0
