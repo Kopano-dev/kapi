@@ -65,7 +65,7 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	case path == "/health-check":
 		s.HealthCheckHandler(rw, req)
 	case strings.HasPrefix(path, "/api/gc/v0/"):
-		s.ProxyHandler(rw, req)
+		http.StripPrefix("/api/gc/v0/", http.HandlerFunc(s.ProxyHandler)).ServeHTTP(rw, req)
 	default:
 		http.NotFound(rw, req)
 	}
