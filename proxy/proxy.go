@@ -38,6 +38,8 @@ var proxyConfiguration = template.Must(template.New("Caddyfile").Parse(`
 		try_duration 1s
 		try_interval 100ms
 
+		without /api/gc/v0
+
 		{{range .}}
 		upstream unix://{{.}}
 		{{end}}
