@@ -33,10 +33,10 @@ var proxyConfiguration = template.Must(template.New("Caddyfile").Parse(`
 		policy least_conn
 		fail_timeout 20ms
 		max_fails 1
-		max_conns 1
+		max_conns 8
 		keepalive 100
 		try_duration 1s
-		try_interval 100ms
+		try_interval 50ms
 
 		{{range .}}
 		upstream unix://{{.}}
