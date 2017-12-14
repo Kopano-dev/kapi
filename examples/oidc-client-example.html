@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+	<title>OIDC example client</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta name="referrer" content="no-referrer">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.2/css/bulma.min.css" integrity="sha256-d+mgRrjtsPCjrT7ltuB1sZ2VybUn1Xgdf8piVG/Va/k=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="common.css" />
+	<link rel="stylesheet" href="oidc-client-example.css" />
+</head>
+<body>
+<div id="app" v-cloak>
+
+<div class="modal" v-if="!!error" v-bind:class="{ 'is-active': !!error}">
+	<div class="modal-background"></div>
+	<div class="modal-content">
+		<div class="notification is-danger">
+			<button class="delete" v-on:click="closeErrorModal"></button>
+			<p>{{ error.code }}<span v-if="error.msg"> : {{ error.msg }}</span></p>
+		</div>
+	</div>
+</div>
+
+<section class="hero is-primary">
+  <div class="hero-body">
+    <div class="container">
+      <h1 class="title">
+        OIDC example client
+      </h1>
+      <h2 class="subtitle">
+        This is a simple web app to test Kopano API endpoints with OIDC tokens.
+      </h2>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+<div class="container">
+	<h3 class="subtitle">OIDC dance</h3>
+
+    <div class="field">
+		<label class="label">Issuer Identifier</label>
+		<div class="control is-expanded">
+			<input class="input" type="text" :disabled="initialized" v-model="iss" >
+		</div>
+	</div>
+
+	<div class="field">
+		<button class="button is-primary" v-on:click="initialize" v-if="!initialized" :disabled="!iss || initialized">Initialize</button>
+	    <button class="button is-primary" v-on:click="startAuthentication" v-if="initialized">Sign in</button>
+		<button class="button is-primary" v-on:click="getUser" v-if="initialized">Get user</button>
+	</div>
+</div>
+</section>
+
+<section class="section">
+<div class="container field is-grouped is-grouped-multiline">
+	<span class="tag is-info" v-if="initialized">initialized</span>
+	<span class="tags has-addons" v-if="user">
+		<span class="tag is-success">{{user.profile.name}}</span>
+		<span class="tag">{{expires_in}}s</span>
+	</span>
+</div>
+</section>
+
+<section class="section" v-if="user">
+<div class="container">
+	<h3 class="subtitle">Requests</h3>
+
+	<div class="field">
+		<button class="button" v-on:click="gcFetchFolders">/api/gc/v0/folders</button>
+		<button class="button" v-on:click="gcFetchUsers">/api/gc/v0/users</button>
+		<button class="button" v-on:click="gcFetchStores">/api/gc/v0/stores</button>
+	</div>
+
+	<pre class="response">{{requestResponse}}</pre>
+</div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js" integrity="sha256-Gs0UYwrz/B58FsQggzU+vvCSyG/pewemP4Lssjzv8Ho=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.3.4/vue-resource.min.js" integrity="sha256-OZ+Xidb5+lV/saUzcfonHJQ3koQncPy0hLjT8dROdOU=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/oidc-client/1.4.1/oidc-client.js" integrity="sha256-Z7M/sCOR7TCNLf1N/oVFonDtCQLmFnkxtdivPNqWaGg=" crossorigin="anonymous"></script>
+<script src="common.js"></script>
+<script src="oidc-client-example.js"></script>
+
+</div> <!-- id=app -->
+</body>
+</html>
