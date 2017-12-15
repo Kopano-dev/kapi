@@ -23,6 +23,7 @@ BASE     = $(GOPATH)/src/$(PACKAGE)
 PKGS     = $(or $(PKG),$(shell cd $(BASE) && env GOPATH=$(GOPATH) $(GO) list ./... | grep -v "^$(PACKAGE)/vendor/"))
 TESTPKGS = $(shell env GOPATH=$(GOPATH) $(GO) list -f '{{ if or .TestGoFiles .XTestGoFiles }}{{ .ImportPath }}{{ end }}' $(PKGS) 2>/dev/null)
 CMDS     = $(or $(CMD),$(addprefix cmd/,$(notdir $(shell find "$(PWD)/cmd/" -type d))))
+PLUGINS  = $(or $(PLUGIN),$(addprefix plugins/,$(notdir $(shell find "$(PWD)/plugins/" -type d))))
 TIMEOUT  = 30
 
 export GOPATH CGO_ENABLED
@@ -30,7 +31,9 @@ export GOPATH CGO_ENABLED
 # Build
 
 .PHONY: all
-all: fmt lint vendor | $(CMDS)
+all: fmt lint vendor | $(CMDS) $(PLUGINS)
+
+plugins: fmt lint vendor | $(PLUGINS)
 
 $(BASE): ; $(info creating local GOPATH ...)
 	@mkdir -p $(dir $@)
@@ -38,12 +41,22 @@ $(BASE): ; $(info creating local GOPATH ...)
 
 .PHONY: $(CMDS)
 $(CMDS): vendor | $(BASE) ; $(info building $@ ...) @
-	cd $(BASE) && $(GO) build \
+	cd $(BASE) && CGO_ENABLED=1 $(GO) build \
 		-tags release \
 		-asmflags '-trimpath=$(GOPATH)' \
 		-gcflags '-trimpath=$(GOPATH)' \
-		-ldflags '-s -w -X $(PACKAGE)/version.Version=$(VERSION) -X $(PACKAGE)/version.BuildDate=$(DATE) -linkmode external -extldflags -static' \
+		-ldflags '-s -w -X $(PACKAGE)/version.Version=$(VERSION) -X $(PACKAGE)/version.BuildDate=$(DATE)' \
 		-o bin/$(notdir $@) $(PACKAGE)/$@
+
+.PHONY: $(PLUGINS)
+$(PLUGINS): vendor | $(BASE) ; $(info building $@ ...) @
+	cd $(BASE) && CGO_ENABLED=1 $(GO) build \
+		-buildmode plugin \
+		-tags release \
+		-asmflags '-trimpath=$(GOPATH)' \
+		-gcflags '-trimpath=$(GOPATH)' \
+		-ldflags '-s -w -X $(PACKAGE)/version.Version=$(VERSION) -X $(PACKAGE)/version.BuildDate=$(DATE)' \
+		-o bin/plugins/$(notdir $@).so $(PACKAGE)/$(@)
 
 # Helpers
 
@@ -109,6 +122,7 @@ dist: ; $(info building dist tarball ...)
 	cp -avf ../LICENSE.txt "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../README.md "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../bin/* "${PACKAGE_NAME}-${VERSION}" && \
+	cp -avf ../bin/plugins "${PACKAGE_NAME}-${VERSION}" && \
 	tar --owner=0 --group=0 -czvf ${PACKAGE_NAME}-${VERSION}.tar.gz "${PACKAGE_NAME}-${VERSION}" && \
 	cd ..
 

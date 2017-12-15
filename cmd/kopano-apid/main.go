@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -51,6 +52,7 @@ func commandServe() *cobra.Command {
 	}
 	serveCmd.Flags().String("listen", "127.0.0.1:8039", "TCP listen address")
 	serveCmd.Flags().String("gc-socket-path", "", "Parent directory for Kopano Groupware Core unix sockets")
+	serveCmd.Flags().String("plugins-path", "./plugins", "Directory where to find plugin .so files")
 
 	return serveCmd
 }
@@ -66,17 +68,29 @@ func serve(cmd *cobra.Command, args []string) error {
 	logger.Infoln("serve start")
 
 	var socketPath string
+	var pluginsPath string
 
 	listenAddr, _ := cmd.Flags().GetString("listen")
+
+	if pluginsPathString, err := cmd.Flags().GetString("plugins-path"); err == nil && pluginsPathString != "" {
+		pluginsPath, err = filepath.Abs(pluginsPathString)
+		if err != nil {
+			return err
+		}
+	}
+	logger.Infof("loading plugins from %s", pluginsPath)
+
 	if socketPathString, err := cmd.Flags().GetString("gc-socket-path"); err == nil && socketPathString != "" {
-		// TODO(longsleep): validate path
-		socketPath = socketPathString
+		socketPath, err = filepath.Abs(socketPathString)
+		if err != nil {
+			return err
+		}
 	}
 	if socketPath == "" {
 		return fmt.Errorf("gc-socket-path is required")
 	}
 
-	srv := server.NewServer(listenAddr, socketPath, logger)
+	srv := server.NewServer(listenAddr, pluginsPath, socketPath, logger)
 
 	logger.Infof("serve started")
 	return srv.Serve(ctx)

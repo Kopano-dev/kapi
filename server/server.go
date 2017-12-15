@@ -34,6 +34,7 @@ import (
 	"github.com/longsleep/go-metrics/timing"
 	"github.com/sirupsen/logrus"
 
+	"stash.kopano.io/kc/kopano-api/plugins"
 	"stash.kopano.io/kc/kopano-api/proxy"
 )
 
@@ -41,20 +42,26 @@ import (
 type Server struct {
 	mutex sync.RWMutex
 
-	listenAddr string
-	socketPath string
-	logger     logrus.FieldLogger
+	listenAddr  string
+	pluginsPath string
+	socketPath  string
+	logger      logrus.FieldLogger
 
 	proxy proxy.Proxy
+
+	plugins []plugins.PluginV1
 }
 
 // NewServer creates a new Server with the provided parameters.
-func NewServer(listenAddr string, socketPath string, logger logrus.FieldLogger) *Server {
+func NewServer(listenAddr string, pluginsPath string, socketPath string, logger logrus.FieldLogger) *Server {
 	s := &Server{
-		listenAddr: listenAddr,
-		socketPath: socketPath,
-		logger:     logger,
+		listenAddr:  listenAddr,
+		pluginsPath: pluginsPath,
+		socketPath:  socketPath,
+		logger:      logger,
 	}
+
+	s.loadPlugins()
 
 	return s
 }
@@ -64,9 +71,26 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	switch path := req.URL.Path; {
 	case path == "/health-check":
 		s.HealthCheckHandler(rw, req)
+
 	case strings.HasPrefix(path, "/api/gc/v0/"):
-		s.accessTokenRequired(http.StripPrefix("/api/gc/v0/", http.HandlerFunc(s.handleProxy))).ServeHTTP(rw, req)
+		s.AccessTokenRequired(http.StripPrefix("/api/gc/v0/", http.HandlerFunc(s.handleProxy))).ServeHTTP(rw, req)
+
 	default:
+		// Try all registered plugins.
+		for _, p := range s.plugins {
+			handled, err := p.ServeHTTP(rw, req)
+			if err != nil {
+				s.logger.WithError(err).Errorf("error in plugin http handler: %#v", p)
+				http.Error(rw, "", http.StatusInternalServerError)
+				return
+			}
+			if handled {
+				// Done.
+				return
+			}
+		}
+
+		// If nothing felt responsible, 404.
 		http.NotFound(rw, req)
 	}
 }
@@ -102,6 +126,11 @@ func (s *Server) AddContext(parent context.Context, next http.Handler) http.Hand
 		// Cancel per request context when done.
 		cancel()
 	})
+}
+
+// Logger returns the accociated logger.
+func (s *Server) Logger() logrus.FieldLogger {
+	return s.logger
 }
 
 // Serve is the accociated Server's main blocking runner.
@@ -155,6 +184,11 @@ func (s *Server) Serve(ctx context.Context) error {
 		}
 	}()
 
+	// Plugins.
+	for _, p := range s.plugins {
+		p.Initialize(serveCtx, s)
+	}
+
 	// HTTP listener.
 	srv := &http.Server{
 		Handler: s.AddContext(serveCtx, s),
@@ -197,6 +231,11 @@ func (s *Server) Serve(ctx context.Context) error {
 
 	if s.proxy != nil {
 		// TODO(longsleep): close upstreams cleanly.
+	}
+
+	// Close plugins.
+	for _, p := range s.plugins {
+		p.Close()
 	}
 
 	// Cancel our own context, wait on managers.

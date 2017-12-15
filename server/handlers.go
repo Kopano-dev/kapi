@@ -34,9 +34,9 @@ func (s *Server) HealthCheckHandler(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-// accessTokenRequired parses incoming bearer authentication and injects the
+// AccessTokenRequired parses incoming bearer authentication and injects the
 // subject of the token into the request as header.
-func (s *Server) accessTokenRequired(next http.Handler) http.Handler {
+func (s *Server) AccessTokenRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		var err error
 		var claims *konnect.AccessTokenClaims
