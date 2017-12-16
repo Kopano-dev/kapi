@@ -32,7 +32,7 @@ type ExamplePlugin struct {
 }
 
 // Initialize initizalizes the accociated plugin.
-func (p *ExamplePlugin) Initialize(ctx context.Context, srv plugins.ServerV1) error {
+func (p *ExamplePlugin) Initialize(ctx context.Context, errCh chan<- error, srv plugins.ServerV1) error {
 	p.ctx = ctx
 	p.srv = srv
 

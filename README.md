@@ -22,13 +22,29 @@ make
 ## Running Kopano API
 
 ```
-./bin/kopano-apid serve --listen 127.0.0.1:8039 \
-  --gc-socket-path=/run/kopano/fleet-runner
+KOPANO_GC_REST_SOCKETS=/run/kopano/fleet-runner ./bin/kopano-apid serve \
+  --listen 127.0.0.1:8039 \
+  --plugins-path=./plugins
 ```
 
-Where `--gc-socket-path` points to a folder containing files ending with `.sock`.
-The folder is scanned for these files on startup and uses all found `.sock` files
-as upstreams for the API proxy.
+Where `--plugins-path` points to a folder containing Kopano API plugin modules.
+Add environment variables as needed by those plugins. See next chapter for
+more information about plugins.
+
+## Plugins
+
+Kopano API supports plugins. Plugins can be used to extend HTTP routes served
+by Kopano API. A example plugin can be found in `plugins/example-plugin`.
+
+### Kopano Groupware Core plugin
+
+Kopano API includes the plugin for Kopano Groupware Core. This plugin provides
+access to Kopano Groupware Core RESTful API via `/api/gc/` URL routing prefix.
+
+To specify where the Groupware Core plugin can find its required backend sockets
+specify the `KOPANO_GC_REST_SOCKETS` environment variable to point to the base
+directory location. All `.sock` files in that directory will be used as upstream
+proxy paths.
 
 ## Run unit tests
 

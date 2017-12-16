@@ -27,6 +27,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"stash.kopano.io/kc/konnect"
 	"stash.kopano.io/kc/konnect/oidc"
+
+	"stash.kopano.io/kc/kopano-api/proxy"
 )
 
 // HealthCheckHandler a http handler return 200 OK when server health is fine.
@@ -97,22 +99,19 @@ func (s *Server) AccessTokenRequired(next http.Handler) http.Handler {
 	})
 }
 
-// handleProxy is a http handler to proxy requests to workers using the
-// accociated proxy.
-func (s *Server) handleProxy(rw http.ResponseWriter, req *http.Request) {
-	s.mutex.RLock()
-	proxy := s.proxy
-	s.mutex.RUnlock()
+// HandleWithProxy returns a http handler to proxy requests to workers using the
+// provided proxy.
+func (s *Server) HandleWithProxy(proxy proxy.Proxy, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		if proxy == nil {
+			next.ServeHTTP(rw, req)
+			return
+		}
 
-	if proxy == nil {
-		s.logger.WithError(errors.New("proxy not configured")).Errorln("proxy request not possible")
-		http.Error(rw, "", http.StatusBadGateway)
-		return
-	}
-
-	status, err := proxy.ServeHTTP(rw, req)
-	if err != nil {
-		s.logger.WithError(err).Errorln("proxy request failed")
-		http.Error(rw, "", status)
-	}
+		status, err := proxy.ServeHTTP(rw, req)
+		if err != nil {
+			s.logger.WithError(err).Errorln("proxy request failed")
+			http.Error(rw, "", status)
+		}
+	})
 }

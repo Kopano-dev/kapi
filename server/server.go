@@ -24,9 +24,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
-	"strings"
-	"sync"
 	"syscall"
 	"time"
 
@@ -35,29 +32,22 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"stash.kopano.io/kc/kopano-api/plugins"
-	"stash.kopano.io/kc/kopano-api/proxy"
 )
 
 // Server represents the base for a HTTP server.
 type Server struct {
-	mutex sync.RWMutex
-
 	listenAddr  string
 	pluginsPath string
-	socketPath  string
 	logger      logrus.FieldLogger
-
-	proxy proxy.Proxy
 
 	plugins []plugins.PluginV1
 }
 
 // NewServer creates a new Server with the provided parameters.
-func NewServer(listenAddr string, pluginsPath string, socketPath string, logger logrus.FieldLogger) *Server {
+func NewServer(listenAddr string, pluginsPath string, logger logrus.FieldLogger) *Server {
 	s := &Server{
 		listenAddr:  listenAddr,
 		pluginsPath: pluginsPath,
-		socketPath:  socketPath,
 		logger:      logger,
 	}
 
@@ -71,9 +61,6 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	switch path := req.URL.Path; {
 	case path == "/health-check":
 		s.HealthCheckHandler(rw, req)
-
-	case strings.HasPrefix(path, "/api/gc/v0/"):
-		s.AccessTokenRequired(http.StripPrefix("/api/gc/v0/", http.HandlerFunc(s.handleProxy))).ServeHTTP(rw, req)
 
 	default:
 		// Try all registered plugins.
@@ -144,49 +131,11 @@ func (s *Server) Serve(ctx context.Context) error {
 	exitCh := make(chan bool, 1)
 	signalCh := make(chan os.Signal)
 
-	go func() {
-		var err error
-		for {
-			for {
-				socketPaths, globErr := filepath.Glob(fmt.Sprintf("%s/*.sock", s.socketPath))
-				if globErr != nil {
-					err = globErr
-					break
-				}
-				if len(socketPaths) == 0 {
-					err = fmt.Errorf("no .sock files found in socket-path")
-					break
-				}
-
-				p, proxyErr := proxy.New(socketPaths)
-				if err != nil {
-					errCh <- proxyErr
-					return
-				}
-
-				s.mutex.Lock()
-				s.proxy = p
-				logger.Debugf("using %d upstream workers", len(socketPaths))
-				s.mutex.Unlock()
-				return
-			}
-
-			if err != nil {
-				logger.WithError(err).Warnln("proxy start delayed")
-			}
-
-			select {
-			case <-exitCh:
-				return
-			case <-time.After(1 * time.Second):
-				// retry.
-			}
-		}
-	}()
-
 	// Plugins.
 	for _, p := range s.plugins {
-		p.Initialize(serveCtx, s)
+		if pluginErr := p.Initialize(serveCtx, errCh, s); pluginErr != nil {
+			return fmt.Errorf("failed to initialize plugin %T: %v", p, pluginErr)
+		}
 	}
 
 	// HTTP listener.
@@ -229,13 +178,11 @@ func (s *Server) Serve(ctx context.Context) error {
 		logger.WithError(shutdownErr).Warn("clean server shutdown failed")
 	}
 
-	if s.proxy != nil {
-		// TODO(longsleep): close upstreams cleanly.
-	}
-
 	// Close plugins.
 	for _, p := range s.plugins {
-		p.Close()
+		if closeErr := p.Close(); closeErr != nil {
+			logger.WithError(err).Debugln("failed to close plugin %T: %v", p, closeErr)
+		}
 	}
 
 	// Cancel our own context, wait on managers.
