@@ -33,6 +33,7 @@ type RegisterPluginV1 func() PluginV1
 // PluginV1 is the interface a plugin needs to implement to be registered as
 // a plugin.
 type PluginV1 interface {
+	Info() *InfoV1
 	Initialize(ctx context.Context, errCh chan<- error, srv ServerV1) error
 	Close() error
 	ServeHTTP(rw http.ResponseWriter, req *http.Request) (bool, error)

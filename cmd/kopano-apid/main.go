@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -52,6 +53,7 @@ func commandServe() *cobra.Command {
 	}
 	serveCmd.Flags().String("listen", "127.0.0.1:8039", "TCP listen address")
 	serveCmd.Flags().String("plugins-path", "./plugins", "Directory where to find plugin .so files")
+	serveCmd.Flags().String("plugins", "", "Enabled plugin IDs. When empty, all found plugins are enabled. Seperate multiple IDs with comma.")
 
 	return serveCmd
 }
@@ -78,7 +80,16 @@ func serve(cmd *cobra.Command, args []string) error {
 	}
 	logger.Infof("loading plugins from %s", pluginsPath)
 
-	srv := server.NewServer(listenAddr, pluginsPath, logger)
+	var enabledPlugins map[string]bool
+	if pluginsString, err := cmd.Flags().GetString("plugins"); err == nil && pluginsString != "" {
+		enabledPlugins = make(map[string]bool)
+		for _, id := range strings.Split(pluginsString, ",") {
+			enabledPlugins[strings.TrimSpace(id)] = true
+		}
+	}
+	logger.Debugf("enabled plugins: %#v", enabledPlugins)
+
+	srv := server.NewServer(listenAddr, pluginsPath, enabledPlugins, logger)
 
 	logger.Infof("serve started")
 	return srv.Serve(ctx)

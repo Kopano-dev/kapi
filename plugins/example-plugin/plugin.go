@@ -23,12 +23,24 @@ import (
 	"net/http"
 
 	"stash.kopano.io/kc/kopano-api/plugins"
+	"stash.kopano.io/kc/kopano-api/version"
 )
+
+var pluginInfo = &plugins.InfoV1{
+	ID:        "example-plugin",
+	Version:   version.Version,
+	BuildDate: version.BuildDate,
+}
 
 // ExamplePlugin implements an example plugin for Kopano API.
 type ExamplePlugin struct {
 	ctx context.Context
 	srv plugins.ServerV1
+}
+
+// Info returns the accociated plugins plugin.Info.
+func (p *ExamplePlugin) Info() *plugins.InfoV1 {
+	return pluginInfo
 }
 
 // Initialize initizalizes the accociated plugin.

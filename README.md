@@ -24,12 +24,18 @@ make
 ```
 KOPANO_GC_REST_SOCKETS=/run/kopano/fleet-runner ./bin/kopano-apid serve \
   --listen 127.0.0.1:8039 \
-  --plugins-path=./plugins
+  --plugins-path=./plugins \
+  --plugins=groupware-core
 ```
 
 Where `--plugins-path` points to a folder containing Kopano API plugin modules.
 Add environment variables as needed by those plugins. See next chapter for
 more information about plugins.
+
+The `--plugins` parameter can be used to select what plugins should be enabled.
+It takes a comma seperated value of plugin IDs as the plugin defined it during
+its build time. If the `--plugins` parameter is empty (the default), all plugins
+found will be activated.
 
 ## Plugins
 

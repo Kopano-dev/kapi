@@ -24,6 +24,8 @@ import (
 	"plugin"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"stash.kopano.io/kc/kopano-api/plugins"
 )
 
@@ -63,10 +65,27 @@ func (s *Server) loadPlugin(path string, fp os.FileInfo, _ error) error {
 
 	if registerLookup, err := p.Lookup("Register"); err == nil {
 		if register, ok := registerLookup.(*plugins.RegisterPluginV1); ok {
-			s.plugins = append(s.plugins, (*register)())
-			s.logger.Debugf("registered plugin: %s", path)
+			p := (*register)()
+
+			info := p.Info()
+			if info.ID == "" {
+				s.logger.Warnf("skipping plugin without ID: %s", path)
+				return nil
+			}
+			if s.enabledPlugins != nil && s.enabledPlugins[info.ID] != true {
+				// Skip plugin when not enabled.
+				s.logger.WithField("plugin", info.ID).Debugf("skipping not enabled plugin: %s", path)
+				return nil
+			}
+
+			s.plugins = append(s.plugins, p)
+			s.logger.WithFields(logrus.Fields{
+				"plugin":  info.ID,
+				"version": info.Version,
+				"build":   info.BuildDate,
+			}).Infof("registered plugin: %s", path)
 		} else {
-			s.logger.Debugf("unknown plugin type %#v: %s", registerLookup, path)
+			s.logger.Warnf("unknown plugin type %#v: %s", registerLookup, path)
 		}
 	} else {
 		s.logger.WithError(err).Debugf("invalid plugin implementation: %s", path)

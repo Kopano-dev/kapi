@@ -28,7 +28,14 @@ import (
 
 	"stash.kopano.io/kc/kopano-api/plugins"
 	"stash.kopano.io/kc/kopano-api/proxy"
+	"stash.kopano.io/kc/kopano-api/version"
 )
+
+var pluginInfo = &plugins.InfoV1{
+	ID:        "groupware-core",
+	Version:   version.Version,
+	BuildDate: version.BuildDate,
+}
 
 // KopanoGroupwareCorePlugin implements the Kopano Groupware Core API within
 // Kopano API.
@@ -40,6 +47,11 @@ type KopanoGroupwareCorePlugin struct {
 	srv plugins.ServerV1
 
 	proxy proxy.Proxy
+}
+
+// Info returns the accociated plugins plugin.Info.
+func (p *KopanoGroupwareCorePlugin) Info() *plugins.InfoV1 {
+	return pluginInfo
 }
 
 // Initialize initizalizes the accociated plugin.

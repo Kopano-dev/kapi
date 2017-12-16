@@ -40,15 +40,17 @@ type Server struct {
 	pluginsPath string
 	logger      logrus.FieldLogger
 
-	plugins []plugins.PluginV1
+	plugins        []plugins.PluginV1
+	enabledPlugins map[string]bool
 }
 
 // NewServer creates a new Server with the provided parameters.
-func NewServer(listenAddr string, pluginsPath string, logger logrus.FieldLogger) *Server {
+func NewServer(listenAddr string, pluginsPath string, enabledPlugins map[string]bool, logger logrus.FieldLogger) *Server {
 	s := &Server{
-		listenAddr:  listenAddr,
-		pluginsPath: pluginsPath,
-		logger:      logger,
+		listenAddr:     listenAddr,
+		pluginsPath:    pluginsPath,
+		enabledPlugins: enabledPlugins,
+		logger:         logger,
 	}
 
 	s.loadPlugins()
