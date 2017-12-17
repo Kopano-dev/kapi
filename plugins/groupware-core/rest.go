@@ -25,10 +25,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"stash.kopano.io/kc/kopano-api/proxy"
+	"stash.kopano.io/kc/kopano-api/proxy/httpproxy"
 )
 
-var restProxyConfiguration = &proxy.Configuration{
+var restProxyConfiguration = &httpproxy.Configuration{
 	Policy:      "least_conn",
 	FailTimeout: 20 * time.Millisecond,
 	MaxFails:    1,
@@ -62,7 +62,7 @@ func (p *KopanoGroupwareCorePlugin) initializeRest(ctx context.Context, socketPa
 				break
 			}
 
-			pr, proxyErr := proxy.New("groupware-core", socketPaths, restProxyConfiguration)
+			pr, proxyErr := httpproxy.New("groupware-core", socketPaths, restProxyConfiguration)
 			if proxyErr != nil {
 				return proxyErr
 			}

@@ -101,7 +101,7 @@ func (s *Server) AccessTokenRequired(next http.Handler) http.Handler {
 
 // HandleWithProxy returns a http handler to proxy requests to workers using the
 // provided proxy.
-func (s *Server) HandleWithProxy(proxy proxy.Proxy, next http.Handler) http.Handler {
+func (s *Server) HandleWithProxy(proxy proxy.HTTPProxyHandler, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		if proxy == nil {
 			next.ServeHTTP(rw, req)

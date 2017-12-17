@@ -46,7 +46,7 @@ type KopanoGroupwareCorePlugin struct {
 	ctx context.Context
 	srv plugins.ServerV1
 
-	proxy proxy.Proxy
+	proxy proxy.HTTPProxyHandler
 }
 
 // Info returns the accociated plugins plugin.Info.

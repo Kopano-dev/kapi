@@ -45,5 +45,5 @@ type ServerV1 interface {
 	Logger() logrus.FieldLogger
 
 	AccessTokenRequired(next http.Handler) http.Handler
-	HandleWithProxy(proxy proxy.Proxy, next http.Handler) http.Handler
+	HandleWithProxy(proxy proxy.HTTPProxyHandler, next http.Handler) http.Handler
 }
