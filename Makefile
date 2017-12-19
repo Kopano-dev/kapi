@@ -1,5 +1,5 @@
 PACKAGE  = stash.kopano.io/kc/kopano-api
-PACKAGE_NAME = kopano-$(shell basename $(PACKAGE))
+PACKAGE_NAME = $(shell basename $(PACKAGE))
 
 # Tools
 
