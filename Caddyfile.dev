@@ -1,0 +1,23 @@
+# Example Caddyfile to use with https://caddyserver.com
+#
+# This assumes you have kopano-apid running on 127.0.0.1:8039.
+
+0.0.0.0:8428 {
+	errors stderr
+	log stdout
+
+	tls self_signed
+
+	proxy / http://127.0.0.1:8039 {
+		transparent
+	}
+}
+
+0.0.0.0:8428/examples {
+	errors stderr
+	log stdout
+
+	tls self_signed
+
+	root ./examples
+}
