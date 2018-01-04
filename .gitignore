@@ -3,3 +3,5 @@
 /.gopath
 /golint.txt
 /govet.txt
+/dist
+/Caddyfile
