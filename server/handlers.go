@@ -18,8 +18,6 @@
 package server
 
 import (
-	"encoding/base64"
-	"encoding/hex"
 	"errors"
 	"net/http"
 	"strings"
@@ -74,12 +72,8 @@ func (s *Server) AccessTokenRequired(next http.Handler) http.Handler {
 
 		if claims != nil && claims.IsAccessToken {
 			// Use sub
-			if userEntryIDByte, decodeErr := base64.StdEncoding.DecodeString(claims.Subject); decodeErr == nil {
-				req.Header.Set("X-Kopano-UserEntryID", hex.EncodeToString(userEntryIDByte))
-				//s.logger.WithField("UserEntryID", req.Header.Get("X-Kopano-UserEntryID")).Debugln("proxy with auth")
-			} else {
-				err = decodeErr
-			}
+			req.Header.Set("X-Kopano-UserEntryID", claims.Subject)
+			//s.logger.WithField("UserEntryID", req.Header.Get("X-Kopano-UserEntryID")).Debugln("proxy with auth")
 		} else {
 			err = errors.New("missing access token claim")
 		}
