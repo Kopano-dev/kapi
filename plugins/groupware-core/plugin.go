@@ -101,7 +101,7 @@ func (p *KopanoGroupwareCorePlugin) ServeHTTP(rw http.ResponseWriter, req *http.
 	switch path := req.URL.Path; {
 
 	case strings.HasPrefix(path, "/api/gc/v0/"):
-		p.srv.AccessTokenRequired(http.StripPrefix("/api/gc/v0/", http.HandlerFunc(p.handleRestV0))).ServeHTTP(rw, req)
+		p.srv.AccessTokenRequired(http.HandlerFunc(p.handleRestV0)).ServeHTTP(rw, req)
 
 	default:
 		handled = false
