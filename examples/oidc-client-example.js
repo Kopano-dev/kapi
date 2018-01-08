@@ -25,7 +25,9 @@ window.app = new Vue({
 		user: null,
 		expires_in: 0,
 		initialized: false,
+		silentRenew: true,
 		iss: '',
+		prompt: null,
 
 		apiPrefix: '/api/gc/v0',
 
@@ -52,7 +54,7 @@ window.app = new Vue({
 	components: {
 	},
 	created: function() {
-		console.info('welcome oidc-client-eample');
+		console.info('welcome to Kopanpo API oidc-client example');
 
 		const queryValues = parseParams(location.search.substr(1));
 		console.log('URL query values on load', queryValues);
@@ -63,6 +65,7 @@ window.app = new Vue({
 		}
 
 		this.iss = iss;
+		this.prompt = '';
 
 		setInterval(() => {
 			if (this.user) {
@@ -78,21 +81,32 @@ window.app = new Vue({
 		if (this.iss) {
 			this.$nextTick(() => {
 				this.initialize().then(() => {
-					this.getUser();
-				})
+					return this.getUser();
+				}).then(user => {
+					console.info('initialized', user, this.isLoggedIn);
+					if (user && !this.isLoggedIn) {
+						return this.userManager.signinSilent();
+					}
+					return Promise.resolve(user);
+				}).then(user => {
+					console.log('initialized phase 2', user, this.isLoggedIn);
+					if (user && !this.isLoggedIn) {
+						return this.removeUser();
+					}
+					return Promise.resolve(user);
+				});
 			});
 		}
 	},
 	watch: {
-		iss: val => {
+		iss: function(val) {
 			if (val) {
-					localStorage.setItem('oidc-client-example.iss', val);
+				localStorage.setItem('oidc-client-example.iss', val);
 			} else {
-					localStorage.removeItem('oidc-client-example.iss');
+				localStorage.removeItem('oidc-client-example.iss');
 			}
 		},
-		user: user => {
-			console.log('user updated', user);
+		user: function(user) {
 			if (user) {
 				this.expires_in = user.expires_in;
 			}
@@ -133,6 +147,10 @@ window.app = new Vue({
 			}
 
 			return res.join('\r\n');
+		},
+
+		isLoggedIn: function() {
+			return this.user != null && !this.user.expired;
 		}
 	},
 	methods: {
@@ -141,23 +159,40 @@ window.app = new Vue({
 
 			const mgr = new Oidc.UserManager({
 				authority: this.iss,
-				client_id: 'oidc-client-example',
+				client_id: 'playground-trusted.js',
 				redirect_uri: callbackURI,
 				response_type: 'id_token token',
 				scope: 'openid profile email',
-				loadUserInfo: true
+				loadUserInfo: true,
+				silent_redirect_uri: qualifyURL('./oidc-silent-refresh.html'),
+				automaticSilentRenew: this.silentRenew,
+				includeIdTokenInSilentRenew: true,
+				prompt: this.prompt
 			});
 			mgr.events.addAccessTokenExpiring(() => {
 				console.log('token expiring');
 			});
-			mgr.events.addUserLoaded(() => {
-				console.log('user loaded');
+			mgr.events.addAccessTokenExpired(() => {
+				console.log('access token expired');
+			});
+			mgr.events.addUserLoaded(user => {
+				console.log('user loaded', user);
+				this.user = user;
+			});
+			mgr.events.addUserUnloaded(() => {
+				console.log('user unloaded');
+				this.user = null;
+			});
+			mgr.events.addSilentRenewError(() => {
+				console.log('user silent renew error');
+			});
+			mgr.events.addUserSignedOut(() => {
+				console.log('user signed out');
 			});
 
 			this.userManager = mgr;
 
 			if (window.location.href.indexOf(callbackURI) === 0) {
-				window.location.hash = window.location.hash.substr(9);
 				return this.completeAuthentication().then(() => {
 					console.log('completed authentication', this.user);
 				}).catch((err) => {
@@ -192,10 +227,6 @@ window.app = new Vue({
 			});
 		},
 
-		isLoggedIn: function() {
-			this.user != null && !this.user.expired;
-		},
-
 		getUser: async function() {
 			return this.userManager.getUser().then((user) => {
 				this.user = user;
@@ -214,9 +245,25 @@ window.app = new Vue({
 
 		removeUser: async function() {
 			return this.userManager.removeUser().then(() => {
-				console.log('xxx', arguments);
 				this.user = null;
 			});
+		},
+
+		querySessionStatus: async function() {
+			return this.userManager.querySessionStatus().then(sessionStatus => {
+				console.log('sessionStatus', sessionStatus);
+				return sessionStatus;
+			});
+		},
+
+		startSilentRenew: function() {
+			this.silentRenew = true;
+			this.userManager.startSilentRenew();
+		},
+
+		stopSilentRenew: function() {
+			this.silentRenew = false;
+			this.userManager.stopSilentRenew();
 		},
 
 		gcGet: async function(url, options={}) {
@@ -326,15 +373,15 @@ window.app = new Vue({
 				subject: 'The standard Lorem Ipsum passage, used since the 1500s',
 				toRecipients: [
 					{
-						name: 'Lorus Ipsis',
-						address: 'user1@localhost'
+						name: this.requestResults.me.userPrincipalName,
+						address: this.requestResults.me.mail
 					}
 				],
 				body: {
 					contentType: 'text',
 					content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
 				}
-			}
+			};
 
 			return this.gcPost(this.apiPrefix + '/me/sendMail', {
 				message: payload

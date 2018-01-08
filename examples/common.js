@@ -40,3 +40,9 @@ function encodeParams(data) {
 	}
 	return ret.join('&');
 }
+
+function qualifyURL(url) {
+	const a = document.createElement('a');
+	a.href = url;
+	return a.href;
+}

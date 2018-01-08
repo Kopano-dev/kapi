@@ -22,7 +22,7 @@
 	</div>
 </div>
 
-<section class="hero is-primary">
+<section class="hero is-warning">
   <div class="hero-body">
 	<div class="container">
 	  <h1 class="title">
@@ -39,19 +39,33 @@
 <div class="container">
 	<h3 class="subtitle">OIDC</h3>
 
-	<div class="field">
-		<label class="label">Issuer Identifier</label>
-		<div class="control is-expanded">
+	<label class="label">Issuer Identifier / Prompt</label>
+	<div class="field has-addons">
+		<p class="control is-expanded">
 			<input class="input" type="text" :disabled="initialized" v-model="iss" >
-		</div>
+		</p>
+		<p class="control">
+			<span class="select">
+				<select v-model="prompt" :disabled="initialized">
+					<option></option>
+					<option>login</option>
+					<option>consent</option>
+					<option>select_account</option>
+					<option>none</option>
+				</select>
+			</span>
+		</p>
 	</div>
 
 	<div class="field">
 		<button class="button is-primary" v-on:click="initialize" v-if="!initialized" :disabled="!iss || initialized">Initialize</button>
-		<button class="button is-success" v-on:click="startAuthentication" v-if="initialized">Sign in</button>
+		<button class="button is-success" v-on:click="startAuthentication" v-if="initialized && !isLoggedIn">Sign in</button>
 		<!--<button class="button" v-on:click="getUser" v-if="initialized">Get user</button>-->
-		<button class="button" v-on:click="uninitialize" v-if="initialized">Uninitialize</button>
-		<button class="button" v-on:click="removeUser" v-if="user">Clear user</button>
+		<button class="button is-danger" v-on:click="uninitialize" v-if="initialized && !user">Uninitialize</button>
+		<button class="button is-danger" v-on:click="removeUser" v-if="user">Clear user</button>
+		<button class="button" v-on:click="querySessionStatus" v-if="user">Query session status</button>
+		<button class="button" v-on:click="startSilentRenew" v-if="initialized && !silentRenew">Start silent renew</button>
+		<button class="button" v-on:click="stopSilentRenew" v-if="initialized && silentRenew">Stop silent renew</button>
 	</div>
 </div>
 </section>
@@ -68,11 +82,8 @@
 
 <section class="section">
 <div class="container">
+	<h3 class="subtitle">API request generator</h3>
 	<nav class="panel">
-		<p class="panel-heading">
-			Requests by API endpoint
-		</p>
-
 		<p class="panel-tabs">
 			<a v-bind:class="{ 'is-active': requestMode.default }" v-on:click="changeRequestMode('')">Base</a>
 			<a v-bind:class="{ 'is-active': requestMode.mailFolders }" v-if="requestResults.mailFolders" v-on:click="changeRequestMode('mailFolders')">mailFolders</a>
@@ -100,7 +111,7 @@
 					</div>
 				</div>
 				<div class="control">
-					<button class="button is-success" v-on:click="runRequest(false)" :disabled="requestEndpoint==''">Run Query</button>
+					<button class="button is-primary" v-on:click="runRequest(false)" :disabled="requestEndpoint==''">Run Query</button>
 				</div>
 				<div class="control">
 					<button :disabled="!requestNextLink" class="button" v-on:click="runRequestNextLink">Next</button>
@@ -122,7 +133,7 @@
 				</div>
 			  </div>
 			  <div class="control">
-				<button class="button is-success" v-on:click="runRequest(true)" :disabled="requestEndpoint==''">Run Query</button>
+				<button class="button is-primary" v-on:click="runRequest(true)" :disabled="requestEndpoint==''">Run Query</button>
 			  </div>
 			</div>
 		</div>
@@ -141,7 +152,7 @@
 				</div>
 			  </div>
 			  <div class="control">
-				<button class="button is-success" v-on:click="runRequest(true)" :disabled="requestEndpoint==''">Run Query</button>
+				<button class="button is-primary" v-on:click="runRequest(true)" :disabled="requestEndpoint==''">Run Query</button>
 			  </div>
 			</div>
 		</div>
@@ -167,9 +178,9 @@
 
 <section class="section" v-if="user">
 <div class="container">
-	<h3 class="subtitle">Create data</h3>
+	<h3 class="subtitle">Create example data via API</h3>
 	<div class="field">
-		<button class="button is-success" v-on:click="createTestMessage">/me/sendMail</button>
+		<button class="button" v-on:click="createTestMessage" :disabled="!requestResults.me">/me/sendMail Lorem ipsum to self</button>
 	</div>
 
 	<article class="message" v-bind:class="{'is-success': createStatus.success, 'is-error': !createStatus.success}" v-if="createStatus">

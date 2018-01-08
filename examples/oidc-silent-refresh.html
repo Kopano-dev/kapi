@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head>
+	<title>OIDC silent refresh page</title>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/oidc-client/1.4.1/oidc-client.js" integrity="sha256-Z7M/sCOR7TCNLf1N/oVFonDtCQLmFnkxtdivPNqWaGg=" crossorigin="anonymous"></script>
+<script>
+	new Oidc.UserManager().signinSilentCallback()
+		.catch((err) => {
+			console.log('silent refresh callback failed', err);
+		});
+</script>
+</body>
+</html>
