@@ -55,6 +55,6 @@ proxy paths.
 ## Run unit tests
 
 ```
-cd ~/go/src/stash.kopano.io/kc/konnect
+cd ~/go/src/stash.kopano.io/kc/kopano-api
 make test
 ```
