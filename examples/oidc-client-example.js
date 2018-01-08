@@ -26,7 +26,28 @@ window.app = new Vue({
 		expires_in: 0,
 		initialized: false,
 		iss: '',
-		requestResponse: ''
+
+		apiPrefix: '/api/gc/v0',
+
+		requestTab: '',
+		requestKey: null,
+		requestEndpoint: '',
+		requestResponse: '',
+		requestResponseHeaders: null,
+		requestNextLink: null,
+
+		requestMode: {
+			default: true
+		},
+		requestStatus: null,
+		requestResults: {},
+
+		responseTab: '',
+		responseMode: {
+			default: true
+		},
+
+		createStatus: null
 	},
 	components: {
 	},
@@ -52,6 +73,8 @@ window.app = new Vue({
 			}
 		}, 500);
 
+		Oidc.Log.logger = console;
+
 		if (this.iss) {
 			this.$nextTick(() => {
 				this.initialize().then(() => {
@@ -73,6 +96,43 @@ window.app = new Vue({
 			if (user) {
 				this.expires_in = user.expires_in;
 			}
+		},
+		requestTab: function(val) {
+			const r = {};
+			switch (val) {
+			case undefined:
+			case '':
+				r.default = true;
+				break;
+			default:
+				r[val] = true;
+				break;
+			}
+			this.requestMode = r;
+		},
+		responseTab: function(val) {
+			const r = {};
+			switch (val) {
+			case undefined:
+			case '':
+				r.default = true;
+				break;
+			default:
+				r[val] = true;
+				break;
+			}
+			this.responseMode = r;
+		}
+	},
+	computed: {
+		requestResponseHeadersFormatted: function() {
+			const res = [];
+			for (var k in this.requestResponseHeaders) {
+				let v = this.requestResponseHeaders[k];
+				res.push(`${k}: ${v}`);
+			}
+
+			return res.join('\r\n');
 		}
 	},
 	methods: {
@@ -112,6 +172,14 @@ window.app = new Vue({
 			}
 		},
 
+		uninitialize: function() {
+			this.userManager.removeUser().then(() => {
+				this.userNamanger = null;
+				this.user = null;
+				this.initialized = false;
+			});
+		},
+
 		startAuthentication: async function() {
 			return this.userManager.signinRedirect();
 		},
@@ -144,28 +212,135 @@ window.app = new Vue({
 			});
 		},
 
-		gcGet: async function(endpoint) {
-			const prefix = '/api/gc/v0';
+		removeUser: async function() {
+			return this.userManager.removeUser().then(() => {
+				console.log('xxx', arguments);
+				this.user = null;
+			});
+		},
 
+		gcGet: async function(url, options={}) {
 			this.requestResponse = '';
-			return this.$http.get(prefix + endpoint).then(response => {
+			this.requestStatus = null;
+			this.requestNextLink = null;
+			const start = new Date();
+
+			return this.$http.get(url, options).then(response => {
 				// Whoohoo success.
 				this.requestResponse = response.body;
+				this.requestResponseHeaders = response.headers.map;
+				this.requestStatus = {
+					success: response.status >= 200 && response.status < 300,
+					code: response.status,
+					duration: (new Date()) - start
+				};
+				return response.body;
+			}).catch(response => {
+				this.requestResponse = response.body;
+				this.requestResponseHeaders = response.headers.map;
+				this.requestStatus = {
+					success: false,
+					code: response.status || 0,
+					duration: (new Date()) - start
+				};
 				return response.body;
 			});
 		},
-		gcFetchFolders: async function() {
-			return this.gcGet('/folders').then(response => {
+
+		gcPost: async function(url, body, options={}) {
+			this.requestStatus = null;
+			const start = new Date();
+
+			return this.$http.post(url, body, options).then(response => {
+				// Whooho success.
+				this.requestStatus = {
+					success: response.status >= 200 && response.status < 300,
+					code: response.status,
+					duration: (new Date()) - start
+				};
+				return response.body;
+			}).catch(response => {
+				this.requestStatus = {
+					success: false,
+					code: response.status,
+					duration: (new Date()) - start
+				};
+				return response.body;
+			});
+		},
+
+		changeRequestMode: function(mode) {
+			this.requestTab = mode;
+			this.requestEndpoint = '';
+		},
+
+		changeResponseMode: function(mode) {
+			this.responseTab = mode;
+		},
+
+		runRequest: async function(discard) {
+			const endpoint = this.requestEndpoint;
+			if (!endpoint) {
+				return;
+			}
+
+			let key = null;
+			if (!discard) {
+				key = endpoint;
+				if (key.indexOf('/me/') === 0) {
+					key = key.substr(4);
+				}
+				if (key.indexOf('/') === 0) {
+					key = key.substr(1);
+				}
+			}
+
+			return this.doRequest(this.apiPrefix + endpoint, key);
+		},
+
+		doRequest: async function(url, requestKey) {
+			console.info('run request', url, requestKey);
+
+			return this.gcGet(url).then(response => {
+				if (requestKey) {
+					this.requestKey = requestKey;
+					this.requestResults[requestKey] = response;
+
+					if (response['@odata.nextLink']) {
+						this.requestNextLink = response['@odata.nextLink'];
+					}
+				}
+
 				return response;
 			});
 		},
-		gcFetchUsers: async function() {
-			return this.gcGet('/users').then(response => {
-				return response;
-			});
+
+		runRequestNextLink: async function() {
+			return this.doRequest(this.requestNextLink, this.requestKey);
 		},
-		gcFetchStores: async function() {
-			return this.gcGet('/stores').then(response => {
+
+		createTestMessage: async function() {
+			this.createStatus = null;
+
+			const payload = {
+				subject: 'The standard Lorem Ipsum passage, used since the 1500s',
+				toRecipients: [
+					{
+						name: 'Lorus Ipsis',
+						address: 'user1@localhost'
+					}
+				],
+				body: {
+					contentType: 'text',
+					content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+				}
+			}
+
+			return this.gcPost(this.apiPrefix + '/me/sendMail', {
+				message: payload
+			}).then(response => {
+				this.createStatus = this.requestStatus;
+
 				return response;
 			});
 		}

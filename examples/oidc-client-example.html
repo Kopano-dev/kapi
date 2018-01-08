@@ -1,12 +1,12 @@
 <!doctype html>
 <html>
 <head>
-	<title>OIDC example client</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>OIDC enabled Kopano API client</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<meta name="referrer" content="no-referrer">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.2/css/bulma.min.css" integrity="sha256-d+mgRrjtsPCjrT7ltuB1sZ2VybUn1Xgdf8piVG/Va/k=" crossorigin="anonymous" />
-    <link rel="stylesheet" href="common.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.2/css/bulma.min.css" integrity="sha256-d+mgRrjtsPCjrT7ltuB1sZ2VybUn1Xgdf8piVG/Va/k=" crossorigin="anonymous" />
+	<link rel="stylesheet" href="common.css" />
 	<link rel="stylesheet" href="oidc-client-example.css" />
 </head>
 <body>
@@ -24,22 +24,22 @@
 
 <section class="hero is-primary">
   <div class="hero-body">
-    <div class="container">
-      <h1 class="title">
-        OIDC example client
-      </h1>
-      <h2 class="subtitle">
-        This is a simple web app to test Kopano API endpoints with OIDC tokens.
-      </h2>
-    </div>
+	<div class="container">
+	  <h1 class="title">
+		OIDC enabled Kopano API client
+	  </h1>
+	  <h2 class="subtitle">
+		This is a simple web app to test Kopano API endpoints with OIDC authentication.
+	  </h2>
+	</div>
   </div>
 </section>
 
 <section class="section">
 <div class="container">
-	<h3 class="subtitle">OIDC dance</h3>
+	<h3 class="subtitle">OIDC</h3>
 
-    <div class="field">
+	<div class="field">
 		<label class="label">Issuer Identifier</label>
 		<div class="control is-expanded">
 			<input class="input" type="text" :disabled="initialized" v-model="iss" >
@@ -48,8 +48,10 @@
 
 	<div class="field">
 		<button class="button is-primary" v-on:click="initialize" v-if="!initialized" :disabled="!iss || initialized">Initialize</button>
-	    <button class="button is-primary" v-on:click="startAuthentication" v-if="initialized">Sign in</button>
-		<button class="button is-primary" v-on:click="getUser" v-if="initialized">Get user</button>
+		<button class="button is-success" v-on:click="startAuthentication" v-if="initialized">Sign in</button>
+		<!--<button class="button" v-on:click="getUser" v-if="initialized">Get user</button>-->
+		<button class="button" v-on:click="uninitialize" v-if="initialized">Uninitialize</button>
+		<button class="button" v-on:click="removeUser" v-if="user">Clear user</button>
 	</div>
 </div>
 </section>
@@ -64,17 +66,117 @@
 </div>
 </section>
 
+<section class="section">
+<div class="container">
+	<nav class="panel">
+		<p class="panel-heading">
+			Requests by API endpoint
+		</p>
+
+		<p class="panel-tabs">
+			<a v-bind:class="{ 'is-active': requestMode.default }" v-on:click="changeRequestMode('')">Base</a>
+			<a v-bind:class="{ 'is-active': requestMode.mailFolders }" v-if="requestResults.mailFolders" v-on:click="changeRequestMode('mailFolders')">mailFolders</a>
+			<!--<a v-bind:class="{ 'is-active': requestMode.calendars }" v-if="requestResults.calendars"  v-on:click="changeRequestMode('calendars')">calendars</a>
+			<a v-bind:class="{ 'is-active': requestMode.events }" v-if="requestResults.events"  v-on:click="changeRequestMode('events')">events</a>-->
+			<a v-bind:class="{ 'is-active': requestMode.messages }" v-if="requestResults.messages"  v-on:click="changeRequestMode('messages')">messages</a>
+			<!--<a v-bind:class="{ 'is-active': requestMode.contacts }" v-if="requestResults.contacts"  v-on:click="changeRequestMode('contacts')">contacts</a>-->
+		</p>
+
+		<div v-if="requestMode.default" class="panel-block is-active">
+			<div class="field has-addons">
+				<div class="control">
+					<div class="select">
+					  <select v-model="requestEndpoint" v-on:change="runRequest(false)">
+						<option value="" disabled selected hidden>Please select endpoint ...</option>
+						<option>/me</option>
+						<option>/me/mailFolders</option>
+						<option>/me/calendar</option>
+						<option>/me/calendars</option>
+						<option>/me/events</option>
+						<option>/me/messages</option>
+						<option>/me/contacts</option>
+						<option>/users</option>
+					  </select>
+					</div>
+				</div>
+				<div class="control">
+					<button class="button is-success" v-on:click="runRequest(false)" :disabled="requestEndpoint==''">Run Query</button>
+				</div>
+				<div class="control">
+					<button :disabled="!requestNextLink" class="button" v-on:click="runRequestNextLink">Next</button>
+				</div>
+			</div>
+		</div>
+
+		<div v-if="requestMode.mailFolders" class="panel-block is-active">
+			<div class="field has-addons">
+			  <div class="control is-expanded">
+				<div class="select is-fullwidth">
+				  <select v-model="requestEndpoint" v-on:change="runRequest(true)">
+					<option value="" disabled selected hidden>Please select endpoint ...</option>
+					<template v-for="f in requestResults.mailFolders.value">
+						<option v-bind:value="'/me/mailFolders/' + f.id">/me/mailFolders/{{f.displayName}}</option>
+						<option v-bind:value="'/me/mailFolders/' + f.id + '/messages'">/me/mailFolders/{{f.displayName}}/messages</option>
+					</template>
+				  </select>
+				</div>
+			  </div>
+			  <div class="control">
+				<button class="button is-success" v-on:click="runRequest(true)" :disabled="requestEndpoint==''">Run Query</button>
+			  </div>
+			</div>
+		</div>
+
+		<div v-if="requestMode.messages" class="panel-block is-active">
+			<div class="field has-addons">
+			  <div class="control">
+				<div class="select">
+				  <select v-model="requestEndpoint" v-on:change="runRequest(true)">
+					<option value="" disabled selected hidden>Please select endpoint ...</option>
+					<template v-for="m in requestResults.messages.value">
+						<option v-bind:value="'/me/messages/' + m.id">/me/messages/{{m.subject}}</option>
+						<option v-if="m.hasAttachments" v-bind:value="'/me/messages/' + m.id + '/attachments'">/me/messages/{{m.subject}}/attachments</option>
+					</template>
+				  </select>
+				</div>
+			  </div>
+			  <div class="control">
+				<button class="button is-success" v-on:click="runRequest(true)" :disabled="requestEndpoint==''">Run Query</button>
+			  </div>
+			</div>
+		</div>
+	</nav>
+
+	<article class="message"  v-bind:class="{'is-success': requestStatus.success, 'is-danger': !requestStatus.success}" v-if="requestStatus">
+	  <div class="message-body">
+	    {{requestStatus.success ? '&#10003; Success' : '&#10060; Failed'}} - Status Code {{requestStatus.code}} <strong style="padding-left:4em">{{requestStatus.duration}}ms</strong>
+	  </div>
+	</article>
+
+	<div class="tabs">
+		<ul>
+			<li v-bind:class="{ 'is-active': responseMode.default }"><a v-on:click="changeResponseMode('')">Response Preview`</a></li>
+			<li v-bind:class="{ 'is-active': responseMode.headers }"><a v-on:click="changeResponseMode('headers')">Response Headers</a></li>
+		</ul>
+	</div>
+	<div class="response" v-if="responseMode.default"><pre ref="requestResponse"><code class="language-json">{{requestResponse}}</code></pre></div>
+	<div class="response" v-if="responseMode.headers"><pre><code>{{requestResponseHeadersFormatted}}</code></pre></div>
+
+</div>
+</section>
+
 <section class="section" v-if="user">
 <div class="container">
-	<h3 class="subtitle">Requests</h3>
-
+	<h3 class="subtitle">Create data</h3>
 	<div class="field">
-		<button class="button" v-on:click="gcFetchFolders">/api/gc/v0/folders</button>
-		<button class="button" v-on:click="gcFetchUsers">/api/gc/v0/users</button>
-		<button class="button" v-on:click="gcFetchStores">/api/gc/v0/stores</button>
+		<button class="button is-success" v-on:click="createTestMessage">/me/sendMail</button>
 	</div>
 
-	<pre class="response">{{requestResponse}}</pre>
+	<article class="message" v-bind:class="{'is-success': createStatus.success, 'is-error': !createStatus.success}" v-if="createStatus">
+	  <div class="message-body">
+		{{createStatus.success ? '&#10003; Success' : '&#10060; Failed'}} - Status Code {{createStatus.code}} <strong style="padding-left:4em">{{createStatus.duration}}ms</strong>
+	  </div>
+	</article>
 </div>
 </section>
 
