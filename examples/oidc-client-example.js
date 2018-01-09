@@ -428,6 +428,49 @@ window.app = new Vue({
 
 				return response;
 			});
+		},
+
+		createTestEvent: async function() {
+			this.createStatus = null;
+
+			const start = moment();
+			const payload = {
+				subject: 'The standard Lorem Ipsum passage, used since the 1500s',
+				start: {
+					dateTime: start
+				},
+				end: {
+					dateTime: moment(start).add(1, 'hour')
+				}
+			};
+
+			return this.gcPost(this.apiPrefix + '/me/calendar/events', payload).then(response => {
+				this.createStatus = this.requestStatus;
+
+				return response;
+			});
+		},
+
+		createRandomContact: async function() {
+			this.createStatus = null;
+
+			const r = Math.random().toString(36)
+			const payload = {
+				displayName: `Some contact ${r}`,
+				emailAddresses: [
+					{
+						name: `Some contact ${r} first email`,
+						address: `some-contact-${r}-first-email@kopano.local`
+					}
+				]
+			};
+
+			return this.gcPost(this.apiPrefix + '/me/contacts', payload).then(response => {
+				this.createStatus = this.requestStatus;
+
+				return response;
+			})
 		}
+
 	}
 });

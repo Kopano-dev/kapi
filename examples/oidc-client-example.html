@@ -104,11 +104,12 @@
 						<option value="" disabled selected hidden>Please select endpoint ...</option>
 						<option>/me</option>
 						<option>/me/mailFolders</option>
+						<option>/me/contactFolders</option>
 						<option>/me/calendar</option>
 						<option>/me/calendars</option>
-						<option>/me/events</option>
 						<option>/me/messages</option>
 						<option>/me/contacts</option>
+						<option>/me/events</option>
 						<option>/users</option>
 					  </select>
 					</div>
@@ -183,7 +184,9 @@
 <div class="container">
 	<h3 class="subtitle">Create example data via API</h3>
 	<div class="field">
-		<button class="button" v-on:click="createTestMessage" :disabled="!requestResults.me">/me/sendMail Lorem ipsum to self</button>
+		<button class="button" v-on:click="createTestMessage" :disabled="!requestResults.me">/me/sendMail Send 'Lorem ipsum' message to self</button>
+		<button class="button" v-on:click="createTestEvent">Create event /me/calendar/events</button>
+		<button class="button" v-on:click="createRandomContact">Create random contact /me/contacts</button>
 	</div>
 
 	<article class="message" v-bind:class="{'is-success': createStatus.success, 'is-error': !createStatus.success}" v-if="createStatus">
@@ -197,6 +200,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js" integrity="sha256-Gs0UYwrz/B58FsQggzU+vvCSyG/pewemP4Lssjzv8Ho=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.3.4/vue-resource.min.js" integrity="sha256-OZ+Xidb5+lV/saUzcfonHJQ3koQncPy0hLjT8dROdOU=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/oidc-client/1.4.1/oidc-client.js" integrity="sha256-Z7M/sCOR7TCNLf1N/oVFonDtCQLmFnkxtdivPNqWaGg=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js" integrity="sha256-ABVkpwb9K9PxubvRrHMkk6wmWcIHUE9eBxNZLXYQ84k=" crossorigin="anonymous"></script>
 <script src="common.js"></script>
 <script src="oidc-client-example.js"></script>
 
