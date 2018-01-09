@@ -465,7 +465,7 @@ window.app = new Vue({
 				]
 			};
 
-			return this.gcPost(this.apiPrefix + '/me/contacts', payload).then(response => {
+			return this.gcPost(this.apiPrefix + '/me/contactFolders/contacts/contacts', payload).then(response => {
 				this.createStatus = this.requestStatus;
 
 				return response;
