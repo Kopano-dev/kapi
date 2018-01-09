@@ -39,15 +39,18 @@
 <div class="container">
 	<h3 class="subtitle">OIDC</h3>
 
-	<label class="label">Issuer Identifier / Prompt</label>
+	<label class="label">Issuer Identifier / Client ID / Prompt</label>
 	<div class="field has-addons">
 		<p class="control is-expanded">
 			<input class="input" type="text" :disabled="initialized" v-model="iss" >
 		</p>
 		<p class="control">
+			<input class="input" type="text" :disabled="initialized" v-model="clientID" >
+		</p>
+		<p class="control">
 			<span class="select">
 				<select v-model="prompt" :disabled="initialized">
-					<option></option>
+					<option value="">not set</option>
 					<option>login</option>
 					<option>consent</option>
 					<option>select_account</option>

@@ -27,6 +27,7 @@ window.app = new Vue({
 		initialized: false,
 		silentRenew: true,
 		iss: '',
+		clientID: '',
 		prompt: null,
 
 		apiPrefix: '/api/gc/v0',
@@ -63,8 +64,16 @@ window.app = new Vue({
 		if (!iss) {
 			iss = localStorage.getItem('oidc-client-example.iss');
 		}
+		let clientID = queryValues.client_id;
+		if (!clientID) {
+			clientID = localStorage.getItem('oidc-client-example.client_id');
+		}
+		if (!clientID) {
+			clientID = "oidc-client-example.js";
+		}
 
 		this.iss = iss;
+		this.clientID = clientID;
 		this.prompt = '';
 
 		setInterval(() => {
@@ -104,6 +113,13 @@ window.app = new Vue({
 				localStorage.setItem('oidc-client-example.iss', val);
 			} else {
 				localStorage.removeItem('oidc-client-example.iss');
+			}
+		},
+		clientID: function(val) {
+			if (val) {
+				localStorage.setItem('oidc-client-example.client_id', val);
+			} else {
+				localStorage.removeItem('oidc-client-example.client_id');
 			}
 		},
 		user: function(user) {
@@ -159,12 +175,13 @@ window.app = new Vue({
 
 			const mgr = new Oidc.UserManager({
 				authority: this.iss,
-				client_id: 'playground-trusted.js',
+				client_id: this.clientID,
 				redirect_uri: callbackURI,
 				response_type: 'id_token token',
 				scope: 'openid profile email',
 				loadUserInfo: true,
 				silent_redirect_uri: qualifyURL('./oidc-silent-refresh.html'),
+				accessTokenExpiringNotificationTime: 120,
 				automaticSilentRenew: this.silentRenew,
 				includeIdTokenInSilentRenew: true,
 				prompt: this.prompt
@@ -174,6 +191,7 @@ window.app = new Vue({
 			});
 			mgr.events.addAccessTokenExpired(() => {
 				console.log('access token expired');
+				mgr.removeUser();
 			});
 			mgr.events.addUserLoaded(user => {
 				console.log('user loaded', user);
@@ -183,8 +201,28 @@ window.app = new Vue({
 				console.log('user unloaded');
 				this.user = null;
 			});
-			mgr.events.addSilentRenewError(() => {
-				console.log('user silent renew error');
+			mgr.events.addSilentRenewError(err => {
+				console.log('user silent renew error', err.error);
+				if (err && err.error === 'interaction_required') {
+					// Handle the hopeless.
+					return;
+				}
+
+				setTimeout(() => {
+					if (!this.silentRenew) {
+						return;
+					}
+					console.log('retrying silent renew');
+					mgr.getUser().then(user => {
+						console.log('retrying silent renew of user', user, user.expired);
+						if (user && !user.expired) {
+							mgr.startSilentRenew();
+						} else {
+							console.log('remove user as silent renew has failed to renew in time');
+							mgr.removeUser();
+						}
+					});
+				}, 5000);
 			});
 			mgr.events.addUserSignedOut(() => {
 				console.log('user signed out');
