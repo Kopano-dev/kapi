@@ -19,6 +19,7 @@
 	font-size: .8em;
 	height: 400px;
 	position: relative;
+	border: 1px solid #ddd;
 }
 .response > pre {
 	position: absolute;
@@ -26,8 +27,4 @@
 	right: 0;
 	top: 0;
 	bottom: 0;
-	overflow: auto;
-	word-wrap: break-word;
-	white-space: pre-wrap;
-	overflow: scroll;
 }

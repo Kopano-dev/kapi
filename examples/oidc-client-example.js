@@ -36,6 +36,7 @@ window.app = new Vue({
 		requestKey: null,
 		requestEndpoint: '',
 		requestResponse: '',
+		requestResponseEditor: null,
 		requestResponseHeaders: null,
 		requestNextLink: null,
 
@@ -75,6 +76,14 @@ window.app = new Vue({
 		this.iss = iss;
 		this.clientID = clientID;
 		this.prompt = '';
+
+		this.$nextTick(() => {
+			this.requestResponseEditor = ace.edit(this.$refs.requestResponseEditor);
+			this.requestResponseEditor.getSession().setMode("ace/mode/json");
+			this.requestResponseEditor.setReadOnly(true);
+			this.requestResponseEditor.setShowPrintMargin(false);
+			this.requestResponseEditor.$blockScrolling = Infinity;
+		});
 
 		setInterval(() => {
 			if (this.user) {
@@ -152,6 +161,14 @@ window.app = new Vue({
 				break;
 			}
 			this.responseMode = r;
+		},
+		requestResponse: function(val) {
+			if (val.trim()) {
+				this.requestResponseEditor.setValue(val);
+			} else {
+				this.requestResponseEditor.setValue('');
+			}
+			this.requestResponseEditor.clearSelection();
 		}
 	},
 	computed: {
@@ -214,7 +231,7 @@ window.app = new Vue({
 					}
 					console.log('retrying silent renew');
 					mgr.getUser().then(user => {
-						console.log('retrying silent renew of user', user, user.expired);
+						console.log('retrying silent renew of user', user);
 						if (user && !user.expired) {
 							mgr.startSilentRenew();
 						} else {
@@ -312,23 +329,27 @@ window.app = new Vue({
 
 			return this.$http.get(url, options).then(response => {
 				// Whoohoo success.
-				this.requestResponse = response.body;
+				response.text().then(t => {
+					this.requestResponse = t;
+				});
 				this.requestResponseHeaders = response.headers.map;
 				this.requestStatus = {
 					success: response.status >= 200 && response.status < 300,
 					code: response.status,
 					duration: (new Date()) - start
 				};
-				return response.body;
+				return response.json();
 			}).catch(response => {
-				this.requestResponse = response.body;
+				response.text().then(t => {
+					this.requestResponse = t;
+				});
 				this.requestResponseHeaders = response.headers.map;
 				this.requestStatus = {
 					success: false,
 					code: response.status || 0,
 					duration: (new Date()) - start
 				};
-				return response.body;
+				return response.text();
 			});
 		},
 
@@ -343,14 +364,14 @@ window.app = new Vue({
 					code: response.status,
 					duration: (new Date()) - start
 				};
-				return response.body;
+				return response.json();
 			}).catch(response => {
 				this.requestStatus = {
 					success: false,
 					code: response.status,
 					duration: (new Date()) - start
 				};
-				return response.body;
+				return response.text();
 			});
 		},
 

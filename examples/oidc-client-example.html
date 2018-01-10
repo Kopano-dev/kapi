@@ -174,8 +174,8 @@
 			<li v-bind:class="{ 'is-active': responseMode.headers }"><a v-on:click="changeResponseMode('headers')">Response Headers</a></li>
 		</ul>
 	</div>
-	<div class="response" v-if="responseMode.default"><pre ref="requestResponse"><code class="language-json">{{requestResponse}}</code></pre></div>
-	<div class="response" v-if="responseMode.headers"><pre><code>{{requestResponseHeadersFormatted}}</code></pre></div>
+	<div class="response" v-show="responseMode.default"><pre ref="requestResponseEditor"></pre></div>
+	<div class="response" v-show="responseMode.headers"><pre><code>{{requestResponseHeadersFormatted}}</code></pre></div>
 
 </div>
 </section>
@@ -201,6 +201,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.3.4/vue-resource.min.js" integrity="sha256-OZ+Xidb5+lV/saUzcfonHJQ3koQncPy0hLjT8dROdOU=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/oidc-client/1.4.1/oidc-client.js" integrity="sha256-Z7M/sCOR7TCNLf1N/oVFonDtCQLmFnkxtdivPNqWaGg=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js" integrity="sha256-ABVkpwb9K9PxubvRrHMkk6wmWcIHUE9eBxNZLXYQ84k=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" integrity="sha256-U//RSeH3TR3773Rk+1lAufJnRjEaG5LcdbvGV72kHEM=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/mode-json.js" integrity="sha256-ddxpx0qTHbqhbDvRedqrlCFkFtYZWNNQq5pQu9qhnGE=" crossorigin="anonymous"></script>
 <script src="common.js"></script>
 <script src="oidc-client-example.js"></script>
 
