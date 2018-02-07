@@ -164,7 +164,7 @@
 
 	<article class="message"  v-bind:class="{'is-success': requestStatus.success, 'is-danger': !requestStatus.success}" v-if="requestStatus">
 	  <div class="message-body">
-	    {{requestStatus.success ? '&#10003; Success' : '&#10060; Failed'}} - Status Code {{requestStatus.code}} <strong style="padding-left:4em">{{requestStatus.duration}}ms</strong>
+	    {{requestStatus.success ? '&#10003; Success' : '&#10060; Failed'}} - Status Code {{requestStatus.code}}<span v-if="requestStatus.msg"> : {{ requestStatus.msg }}</span><strong style="padding-left:4em">{{requestStatus.duration}}ms</strong>
 	  </div>
 	</article>
 
@@ -191,7 +191,7 @@
 
 	<article class="message" v-bind:class="{'is-success': createStatus.success, 'is-error': !createStatus.success}" v-if="createStatus">
 	  <div class="message-body">
-		{{createStatus.success ? '&#10003; Success' : '&#10060; Failed'}} - Status Code {{createStatus.code}} <strong style="padding-left:4em">{{createStatus.duration}}ms</strong>
+		{{createStatus.success ? '&#10003; Success' : '&#10060; Failed'}} - Status Code {{createStatus.code}}<span v-if="createStatus.msg"> : {{ createStatus.msg }}</span> <strong style="padding-left:4em">{{createStatus.duration}}ms</strong>
 	  </div>
 	</article>
 </div>

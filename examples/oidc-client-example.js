@@ -328,6 +328,11 @@ window.app = new Vue({
 			const start = new Date();
 
 			return this.$http.get(url, options).then(response => {
+				if (response.headers.get('content-type').indexOf('application/json') !== 0) {
+					// Require JSON response, everything else is an error.
+					throw response;
+				}
+
 				// Whoohoo success.
 				response.text().then(t => {
 					this.requestResponse = t;
@@ -349,7 +354,7 @@ window.app = new Vue({
 					code: response.status || 0,
 					duration: (new Date()) - start
 				};
-				return response.text();
+				return {};
 			});
 		},
 
@@ -358,6 +363,11 @@ window.app = new Vue({
 			const start = new Date();
 
 			return this.$http.post(url, body, options).then(response => {
+				if (response.headers.get('content-type').indexOf('application/json') !== 0) {
+					// Require JSON response, everything else is an error.
+					throw response;
+				}
+
 				// Whooho success.
 				this.requestStatus = {
 					success: response.status >= 200 && response.status < 300,
@@ -368,10 +378,11 @@ window.app = new Vue({
 			}).catch(response => {
 				this.requestStatus = {
 					success: false,
-					code: response.status,
+					code: response.status || 0,
+					msg: ''+response,
 					duration: (new Date()) - start
 				};
-				return response.text();
+				return {};
 			});
 		},
 
