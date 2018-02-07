@@ -17,3 +17,5 @@ import:
   version: ^0.2.2
 - package: github.com/dgrijalva/jwt-go
   version: v3.1.0
+- package: github.com/rs/cors
+  version: v1.2

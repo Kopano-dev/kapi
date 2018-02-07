@@ -1,5 +1,5 @@
-hash: 7edd1a8bc04a5fa520196d10bf41d0aa1f7ffde8c983a1a26d38fcee0fa3fdb5
-updated: 2017-12-01T18:25:01.309809665+01:00
+hash: 47f9f8c526d4980791ac05448b5f55fe34991f6fb78c5e9b099b1a9c0f9b5019
+updated: 2018-02-07T16:07:02.818654132+01:00
 imports:
 - name: github.com/aead/chacha20
   version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
@@ -69,6 +69,8 @@ imports:
 - name: github.com/miekg/dns
   version: 0f3adef2e2201d72e50309a36fc99d8a9d1a4960
   repo: https://github.com/miekg/dns
+- name: github.com/rs/cors
+  version: 7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6
 - name: github.com/russross/blackfriday
   version: 067529f716f4c3f5e37c8c95ddd59df1007290ae
   repo: https://github.com/russross/blackfriday
@@ -85,7 +87,9 @@ imports:
   - acme
 - name: golang.org/x/crypto
   version: 2faea1465de239e4babd8f5905cc25b781712442
+  repo: https://go.googlesource.com/crypto
   subpackages:
+  - acme
   - curve25519
   - hkdf
   - ocsp
@@ -127,7 +131,7 @@ imports:
   - cipher
   - json
 - name: stash.kopano.io/kc/konnect
-  version: 985b8a339334b1050ca715de9e733020adc562dc
+  version: c393f4d5668daa813cd89b0d1492a5b2fcdba571
   subpackages:
   - oidc
   - oidc/payload

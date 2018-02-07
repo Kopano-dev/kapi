@@ -26,6 +26,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/rs/cors"
+
 	"stash.kopano.io/kc/kopano-api/plugins"
 	"stash.kopano.io/kc/kopano-api/proxy"
 	"stash.kopano.io/kc/kopano-api/version"
@@ -46,6 +48,7 @@ type KopanoGroupwareCorePlugin struct {
 	ctx context.Context
 	srv plugins.ServerV1
 
+	cors  *cors.Cors
 	proxy proxy.HTTPProxyHandler
 }
 
@@ -68,11 +71,16 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 
 	socketPath, err := filepath.Abs(socketPath)
 	if err != nil {
-		return fmt.Errorf("KOPANOGC_REST_SOCKET value is invalid: %v", err)
+		return fmt.Errorf("KOPANO_GC_REST_SOCKETS value is invalid: %v", err)
 	}
 
 	if fp, err := os.Stat(socketPath); err != nil || !fp.IsDir() {
 		return fmt.Errorf("KOPANO_GC_REST_SOCKETS does not exist or is not directory: %v", err)
+	}
+
+	if os.Getenv("KOPANO_GC_REST_ALLOW_CORS") == "1" {
+		p.srv.Logger().Warnln("groupware-core: CORS support enabled")
+		p.cors = cors.AllowAll()
 	}
 
 	// Start looking for sockets asynchronously to allow them to start later.
@@ -97,17 +105,27 @@ func (p *KopanoGroupwareCorePlugin) Close() error {
 
 // ServeHTTP serves HTTP requests.
 func (p *KopanoGroupwareCorePlugin) ServeHTTP(rw http.ResponseWriter, req *http.Request) (bool, error) {
-	handled := true
+	var handler http.Handler
+
+	// Find handler.
 	switch path := req.URL.Path; {
-
 	case strings.HasPrefix(path, "/api/gc/v0/"):
-		p.srv.AccessTokenRequired(http.HandlerFunc(p.handleRestV0)).ServeHTTP(rw, req)
-
-	default:
-		handled = false
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleRestV0))
+	}
+	if handler == nil {
+		// Fast exit.
+		return false, nil
 	}
 
-	return handled, nil
+	// Add support for CORS if configured.
+	if p.cors != nil {
+		handler = p.cors.Handler(handler)
+	}
+
+	// Execute handler.
+	handler.ServeHTTP(rw, req)
+
+	return true, nil
 }
 
 // Register is the exported registration entry point as loaded by Kopano API to
