@@ -45,7 +45,7 @@ func (p *KopanoGroupwareCorePlugin) initializeRest(ctx context.Context, socketPa
 	var init bool
 	for {
 		for {
-			socketPaths, globErr := filepath.Glob(fmt.Sprintf("%s/*.sock", socketPath))
+			socketPaths, globErr := filepath.Glob(fmt.Sprintf("%s/mfr*.sock", socketPath))
 			if globErr != nil {
 				err = globErr
 				break
