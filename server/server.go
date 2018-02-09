@@ -42,6 +42,8 @@ type Server struct {
 
 	plugins        []plugins.PluginV1
 	enabledPlugins map[string]bool
+
+	requestLog bool
 }
 
 // NewServer creates a new Server with the provided parameters.
@@ -51,6 +53,7 @@ func NewServer(listenAddr string, pluginsPath string, enabledPlugins map[string]
 		pluginsPath:    pluginsPath,
 		enabledPlugins: enabledPlugins,
 		logger:         logger,
+		requestLog:     os.Getenv("DEBUG_SERVER_REQUEST_LOG") == "1",
 	}
 
 	s.loadPlugins()
@@ -91,27 +94,31 @@ func (s *Server) AddContext(parent context.Context, next http.Handler) http.Hand
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// Create per request context.
 		ctx, cancel := context.WithCancel(parent)
-		loggedWriter := metrics.NewLoggedResponseWriter(rw)
 
-		// Create per request context.
-		ctx = timing.NewContext(ctx, func(duration time.Duration) {
-			// This is the stop callback, called when complete with duration.
-			durationMs := float64(duration) / float64(time.Millisecond)
-			// Log request.
-			s.logger.WithFields(logrus.Fields{
-				"status":     loggedWriter.Status(),
-				"method":     req.Method,
-				"path":       req.URL.Path,
-				"remote":     req.RemoteAddr,
-				"duration":   durationMs,
-				"referer":    req.Referer(),
-				"user-agent": req.UserAgent(),
-				"origin":     req.Header.Get("Origin"),
-			}).Debug("HTTP request complete")
-		})
+		if s.requestLog {
+			loggedWriter := metrics.NewLoggedResponseWriter(rw)
+			// Create per request context.
+			ctx = timing.NewContext(ctx, func(duration time.Duration) {
+				// This is the stop callback, called when complete with duration.
+				durationMs := float64(duration) / float64(time.Millisecond)
+				// Log request.
+				s.logger.WithFields(logrus.Fields{
+					"status":     loggedWriter.Status(),
+					"method":     req.Method,
+					"path":       req.URL.Path,
+					"remote":     req.RemoteAddr,
+					"duration":   durationMs,
+					"referer":    req.Referer(),
+					"user-agent": req.UserAgent(),
+					"origin":     req.Header.Get("Origin"),
+				}).Debug("HTTP request complete")
+			})
+			rw = loggedWriter
+		}
 
 		// Run the request.
-		next.ServeHTTP(loggedWriter, req.WithContext(ctx))
+		next.ServeHTTP(rw, req.WithContext(ctx))
+
 		// Cancel per request context when done.
 		cancel()
 	})
