@@ -5,3 +5,4 @@
 /govet.txt
 /dist
 /Caddyfile
+__pycache__

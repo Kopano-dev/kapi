@@ -31,9 +31,9 @@ import (
 
 var restProxyConfiguration = &httpproxy.Configuration{
 	Policy:      "least_conn",
-	FailTimeout: 20 * time.Millisecond,
+	FailTimeout: 500 * time.Millisecond,
 	MaxFails:    1,
-	MaxConns:    8,
+	MaxConns:    0,
 	Keepalive:   100,
 	TryDuration: 1 * time.Second,
 	TryInterval: 50 * time.Millisecond,
