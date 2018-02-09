@@ -182,7 +182,7 @@
 
 <section class="section" v-if="user">
 <div class="container">
-	<h3 class="subtitle">Create example data via API</h3>
+	<h3 class="subtitle">Create example data</h3>
 	<div class="field">
 		<button class="button" v-on:click="createTestMessage" :disabled="!requestResults.me">/me/sendMail Send 'Lorem ipsum' message to self</button>
 		<button class="button" v-on:click="createTestEvent">Create event /me/calendar/events</button>
@@ -194,6 +194,29 @@
 		{{createStatus.success ? '&#10003; Success' : '&#10060; Failed'}} - Status Code {{createStatus.code}}<span v-if="createStatus.msg"> : {{ createStatus.msg }}</span> <strong style="padding-left:4em">{{createStatus.duration}}ms</strong>
 	  </div>
 	</article>
+</div>
+</section>
+
+<section class="section" v-if="user">
+<div class="container">
+	<h3 class="subtitle">Create subscription</h3>
+
+	<label class="label">Resource</label>
+	<div class="field">
+		<p class="control is-expanded">
+			<input class="input" type="text" v-model="requestContext" >
+		</p>
+	</div>
+
+	<div class="field">
+		<button :disabled="!requestContext" class="button" v-on:click="createSubscription">Create subscription</button>
+	</div>
+
+	<article class="message" v-bind:class="{'is-success': subscriptionStatus.success, 'is-error': !createStatus.success}" v-if="subscriptionStatus">
+	  <div class="message-body">
+		{{subscriptionStatus.success ? '&#10003; Success' : '&#10060; Failed'}} - Status Code {{subscriptionStatus.code}}<span v-if="createStatus.msg"> : {{ subscriptionStatus.msg }}</span> <strong style="padding-left:4em">{{subscriptionStatus.duration}}ms</strong>
+	  </div>
+  </article>
 </div>
 </section>
 

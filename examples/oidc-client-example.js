@@ -45,13 +45,16 @@ window.app = new Vue({
 		},
 		requestStatus: null,
 		requestResults: {},
+		requestResult: null,
+		requestContext: '',
 
 		responseTab: '',
 		responseMode: {
 			default: true
 		},
 
-		createStatus: null
+		createStatus: null,
+		subscriptionStatus: null,
 	},
 	components: {
 	},
@@ -368,7 +371,11 @@ window.app = new Vue({
 					throw response;
 				}
 
-				// Whooho success.
+				// Whoohoo success.
+				response.text().then(t => {
+					this.requestResponse = t;
+				});
+				this.requestResponseHeaders = response.headers.map;
 				this.requestStatus = {
 					success: response.status >= 200 && response.status < 300,
 					code: response.status,
@@ -376,6 +383,10 @@ window.app = new Vue({
 				};
 				return response.json();
 			}).catch(response => {
+				response.text().then(t => {
+					this.requestResponse = t;
+				});
+				this.requestResponseHeaders = response.headers.map;
 				this.requestStatus = {
 					success: false,
 					code: response.status || 0,
@@ -419,6 +430,12 @@ window.app = new Vue({
 			console.info('run request', url, requestKey);
 
 			return this.gcGet(url).then(response => {
+				this.requestResult = response;
+				this.requestContext = '';
+				if (response && response.hasOwnProperty('@odata.context')) {
+					this.requestContext = response['@odata.context'].substr(this.apiPrefix.length + 1);
+				}
+
 				if (requestKey) {
 					this.requestKey = requestKey;
 					this.requestResults[requestKey] = response;
@@ -501,6 +518,27 @@ window.app = new Vue({
 
 			return this.gcPost(this.apiPrefix + '/me/contactFolders/contacts/contacts', payload).then(response => {
 				this.createStatus = this.requestStatus;
+
+				return response;
+			})
+		},
+
+		createSubscription: async function() {
+			console.log('create subscription', this.requestContext);
+
+			const resource = this.requestContext;
+
+			const changeType = "created,updated";
+			const expirationDateTime = new Date();
+			const payload = {
+				"changeType": changeType,
+				"resource": resource,
+				"expirationDateTime": expirationDateTime,
+				"clientState": "subscription-identifier"
+			}
+
+			return this.gcPost(this.apiPrefix + '/subscriptions', payload).then(response => {
+				this.subscriptionStatus = this.requestStatus;
 
 				return response;
 			})

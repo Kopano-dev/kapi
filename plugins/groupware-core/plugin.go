@@ -48,8 +48,10 @@ type KopanoGroupwareCorePlugin struct {
 	ctx context.Context
 	srv plugins.ServerV1
 
-	cors  *cors.Cors
-	proxy proxy.HTTPProxyHandler
+	cors *cors.Cors
+
+	defaultProxy      proxy.HTTPProxyHandler
+	subscriptionProxy proxy.HTTPProxyHandler
 }
 
 // Info returns the accociated plugins plugin.Info.
@@ -75,7 +77,7 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 	}
 
 	if fp, err := os.Stat(socketPath); err != nil || !fp.IsDir() {
-		return fmt.Errorf("KOPANO_GC_REST_SOCKETS does not exist or is not directory: %v", err)
+		return fmt.Errorf("KOPANO_GC_REST_SOCKETS does not exist or is not a directory: %v", err)
 	}
 
 	if os.Getenv("KOPANO_GC_REST_ALLOW_CORS") == "1" {
@@ -83,12 +85,38 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 		p.cors = cors.AllowAll()
 	}
 
-	// Start looking for sockets asynchronously to allow them to start later.
+	// Start looking for rest sockets asynchronously to allow them to start later.
 	go func() {
-		err := p.initializeRest(ctx, socketPath)
+		pr, err := p.initializeProxy(ctx, socketPath, "mfr*.sock")
 		if err != nil {
 			errCh <- err
+			return
 		}
+		if pr == nil {
+			return
+		}
+
+		p.mutex.Lock()
+		p.defaultProxy = pr
+		p.mutex.Unlock()
+		p.srv.Logger().Debugf("groupware-core: enabled default api proxy")
+	}()
+
+	// Start looking for subscriptions ockets asynchronously to allow them to start later.
+	go func() {
+		pr, err := p.initializeProxy(ctx, socketPath, "notify*.sock")
+		if err != nil {
+			errCh <- err
+			return
+		}
+		if pr == nil {
+			return
+		}
+
+		p.mutex.Lock()
+		p.subscriptionProxy = pr
+		p.mutex.Unlock()
+		p.srv.Logger().Debugf("groupware-core: enabled subscription proxy")
 	}()
 
 	return nil
@@ -109,9 +137,13 @@ func (p *KopanoGroupwareCorePlugin) ServeHTTP(rw http.ResponseWriter, req *http.
 
 	// Find handler.
 	switch path := req.URL.Path; {
+	case strings.HasPrefix(path, "/api/gc/v0/subscriptions"):
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleSubscriptionsV0))
+
 	case strings.HasPrefix(path, "/api/gc/v0/"):
-		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleRestV0))
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleDefaultV0))
 	}
+
 	if handler == nil {
 		// Fast exit.
 		return false, nil

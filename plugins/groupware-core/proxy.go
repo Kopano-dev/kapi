@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"stash.kopano.io/kc/kopano-api/proxy"
 	"stash.kopano.io/kc/kopano-api/proxy/httpproxy"
 )
 
@@ -38,20 +39,20 @@ var restProxyConfiguration = &httpproxy.Configuration{
 	TryInterval: 50 * time.Millisecond,
 }
 
-func (p *KopanoGroupwareCorePlugin) initializeRest(ctx context.Context, socketPath string) error {
-	p.srv.Logger().Debugf("groupware-core: looking for .sock files in %s", socketPath)
+func (p *KopanoGroupwareCorePlugin) initializeProxy(ctx context.Context, socketPath string, pattern string) (proxy.HTTPProxyHandler, error) {
+	p.srv.Logger().Debugf("groupware-core: looking for proxy %s files in %s", pattern, socketPath)
 
 	var err error
 	var init bool
 	for {
 		for {
-			socketPaths, globErr := filepath.Glob(fmt.Sprintf("%s/mfr*.sock", socketPath))
+			socketPaths, globErr := filepath.Glob(fmt.Sprintf("%s/%s", socketPath, pattern))
 			if globErr != nil {
 				err = globErr
 				break
 			}
 			if len(socketPaths) == 0 {
-				err = fmt.Errorf("no .sock files found in socket-path")
+				err = fmt.Errorf("no proxy %s files found in socket-path", pattern)
 				break
 			}
 
@@ -64,34 +65,40 @@ func (p *KopanoGroupwareCorePlugin) initializeRest(ctx context.Context, socketPa
 
 			pr, proxyErr := httpproxy.New("groupware-core", socketPaths, restProxyConfiguration)
 			if proxyErr != nil {
-				return proxyErr
+				return nil, proxyErr
 			}
 
-			p.mutex.Lock()
-			p.proxy = pr
-			p.srv.Logger().Debugf("groupware-core: enabled proxy with %d upstream workers", len(socketPaths))
-			p.mutex.Unlock()
-			return nil
+			p.srv.Logger().Debugf("groupware-core: found %d %s upstream proxy workers", len(socketPaths), pattern)
+			return pr, nil
 		}
 
 		if err != nil {
-			p.srv.Logger().WithError(err).Warnln("groupware-core: waiting for .sock files to appear")
+			p.srv.Logger().WithError(err).Warnln("groupware-core: waiting for proxy %s files to appear", pattern)
 		}
 
 		select {
 		case <-p.exitCh:
-			return nil
+			return nil, nil
 		case <-ctx.Done():
-			return nil
+			return nil, nil
 		case <-time.After(1 * time.Second):
 			// retry.
 		}
 	}
 }
 
-func (p *KopanoGroupwareCorePlugin) handleRestV0(rw http.ResponseWriter, req *http.Request) {
+func (p *KopanoGroupwareCorePlugin) handleDefaultV0(rw http.ResponseWriter, req *http.Request) {
 	p.mutex.RLock()
-	proxy := p.proxy
+	proxy := p.defaultProxy
+	p.mutex.RUnlock()
+
+	// Proxy all.
+	p.srv.HandleWithProxy(proxy, http.HandlerFunc(p.handleNoProxy)).ServeHTTP(rw, req)
+}
+
+func (p *KopanoGroupwareCorePlugin) handleSubscriptionsV0(rw http.ResponseWriter, req *http.Request) {
+	p.mutex.RLock()
+	proxy := p.subscriptionProxy
 	p.mutex.RUnlock()
 
 	// Proxy all.
