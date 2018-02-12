@@ -19,3 +19,14 @@ import:
   version: v3.1.0
 - package: github.com/rs/cors
   version: v1.2
+- package: github.com/gorilla/mux
+  version: ~1.6.1
+- package: stash.kopano.io/kwm/kwmserver
+  version: ~0.4.0
+  subpackages:
+  - signaling/api-v1/connection
+- package: stash.kopano.io/kgol/rndm
+  version: ~1.0.0
+- package: github.com/gorilla/securecookie
+  version: v1.1
+- package: github.com/cskr/pubsub
