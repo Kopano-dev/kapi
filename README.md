@@ -42,7 +42,7 @@ found will be activated.
 Kopano API supports plugins. Plugins can be used to extend HTTP routes served
 by Kopano API. A example plugin can be found in `plugins/example-plugin`.
 
-### Kopano Groupware Core plugin
+### groupware-core: Kopano Groupware Core plugin
 
 Kopano API includes the plugin for Kopano Groupware Core. This plugin provides
 access to Kopano Groupware Core RESTful API via `/api/gc/` URL routing prefix.
@@ -51,6 +51,13 @@ To specify where the Groupware Core plugin can find its required backend sockets
 specify the `KOPANO_GC_REST_SOCKETS` environment variable to point to the base
 directory location. All `.sock` files in that directory will be used as upstream
 proxy paths.
+
+### pubs: Kopano Pubsub and Webhook plugin
+
+Kopano API includes a pub/sub system and webhooko system via the Pubs plugin. To
+specify the cryptographic secret for the Pubs plugin use the environment
+variable `KOPANO_PUBS_SECRET_KEY`. For more information on the Pubs plugin look
+at 'plugins/pubs/README.md'.
 
 ## Run unit tests
 
