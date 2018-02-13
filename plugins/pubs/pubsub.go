@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/sirupsen/logrus"
 	"stash.kopano.io/kgol/rndm"
 	"stash.kopano.io/kwm/kwmserver/signaling/api-v1/connection"
 )
@@ -54,14 +55,14 @@ func (p *PubsPlugin) onSubInit(c *connection.Connection) error {
 	}
 	err = c.RawSend(event)
 	if err != nil {
-		p.srv.Logger().WithError(err).Warnf("pubs: error while sending hello to connection %s", c.ID())
+		c.Logger().WithError(err).Warnf("pubs: error while sending hello to connection %s", c.ID())
 		return err
 	}
 
 	// Initialize forwarder.
 	go func() {
 		defer func() {
-			p.srv.Logger().Debugf("pubs: pubsub with connection %s has ended", c.ID())
+			c.Logger().WithField("id", binder.id).Debugln("pubs: pubsub connection has ended")
 		}()
 		var err error
 		for {
@@ -73,7 +74,7 @@ func (p *PubsPlugin) onSubInit(c *connection.Connection) error {
 				}
 				err = c.RawSend(payload.([]byte))
 				if err != nil {
-					p.srv.Logger().WithError(err).Warnf("pubs: error while sending to connection %s", c.ID())
+					c.Logger().WithError(err).WithField("id", binder.id).Warnln("pubs: error while sending to connection")
 					// Close connection if it is not able to get our pubsub data.
 					c.Close()
 					return
@@ -81,6 +82,8 @@ func (p *PubsPlugin) onSubInit(c *connection.Connection) error {
 			}
 		}
 	}()
+
+	c.Logger().WithField("id", binder.id).Debugln("pubs: pubsub connection initialized")
 
 	return nil
 }
@@ -121,8 +124,11 @@ func (p *PubsPlugin) onSub(c *connection.Connection, topicDefinition *streamTopi
 		return errors.New("pubsub_not_bound")
 	}
 
+	c.Logger().WithFields(logrus.Fields{
+		"topics": topicDefinition.Topics,
+		"id":     binder.id,
+	}).Debugln("pubs: sub with connection")
 	p.pubsub.AddSub(binder.ch, topicDefinition.Topics...)
-	p.srv.Logger().WithField("topics", topicDefinition.Topics).Debugf("pubs: sub with connection %s", c.ID())
 
 	return nil
 }
@@ -133,6 +139,7 @@ func (p *PubsPlugin) onUnsubAll(c *connection.Connection) error {
 		return errors.New("pubsub_not_bound")
 	}
 
+	c.Logger().WithField("id", binder.id).Debugln("pubs: unsub all with connection")
 	p.pubsub.Unsub(binder.ch)
 	return nil
 }
@@ -146,8 +153,11 @@ func (p *PubsPlugin) onUnsub(c *connection.Connection, topicDefinition *streamTo
 		return errors.New("pubsub_not_bound")
 	}
 
+	c.Logger().WithFields(logrus.Fields{
+		"topics": topicDefinition.Topics,
+		"id":     binder.id,
+	}).Debugln("pubs: unsub with connection")
 	p.pubsub.Unsub(binder.ch, topicDefinition.Topics...)
-	p.srv.Logger().WithField("topics", topicDefinition.Topics).Debugf("pubs: unsub with connection %s", c.ID())
 
 	return nil
 }
@@ -177,6 +187,10 @@ func (p *PubsPlugin) onPub(c *connection.Connection, topicDefinition *streamTopi
 		return err
 	}
 
+	c.Logger().WithFields(logrus.Fields{
+		"topics": topicDefinition.Topics,
+		"id":     binder.id,
+	}).Debugln("pubs: pub with connection")
 	p.pubsub.Pub(event, topicDefinition.Topics...)
 	return nil
 }

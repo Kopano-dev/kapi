@@ -25,14 +25,14 @@ import (
 
 // OnConnect is called for new connections.
 func (p *PubsPlugin) OnConnect(c *connection.Connection) error {
-	//p.srv.Logger().Debugln("pubs: stream websocket OnConnect")
+	c.Logger().Debugln("pubs: stream websocket connect")
 
 	return p.onSubInit(c)
 }
 
 // OnDisconnect is called after a connection has closed.
 func (p *PubsPlugin) OnDisconnect(c *connection.Connection) error {
-	//p.srv.Logger().Debugln("pubs: stream websocket OnDisconnect")
+	c.Logger().Debugln("pubs: stream websocket disconnect")
 
 	return p.onUnsubAll(c)
 }
@@ -66,7 +66,7 @@ func (p *PubsPlugin) OnText(c *connection.Connection, msg []byte) error {
 		err = p.onPubSub(c, &envelope)
 
 	default:
-		p.srv.Logger().WithField("type", envelope.Type).Warnln("pubs: unknown incoming message type")
+		c.Logger().WithField("type", envelope.Type).Warnln("pubs: unknown incoming message type")
 		return nil
 	}
 

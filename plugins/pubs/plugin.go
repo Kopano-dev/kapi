@@ -22,12 +22,14 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"encoding/hex"
 	"github.com/cskr/pubsub"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/websocket"
+	"github.com/orcaman/concurrent-map"
 	"stash.kopano.io/kgol/rndm"
 
 	"stash.kopano.io/kc/kopano-api/plugins"
@@ -38,6 +40,10 @@ import (
 const (
 	websocketReadBufferSize  = 1024 * 10
 	websocketWriteBufferSize = 1024 * 10
+
+	connectExpiration      = time.Duration(30) * time.Second
+	connectCleanupInterval = time.Duration(1) * time.Minute
+	connectKeySize         = 24
 )
 
 var pluginInfo = &plugins.InfoV1{
@@ -53,12 +59,14 @@ type PubsPlugin struct {
 	srv plugins.ServerV1
 
 	handler   http.Handler
+	keys      cmap.ConcurrentMap
 	upgrader  *websocket.Upgrader
 	cookie    *securecookie.SecureCookie
 	pubsub    *pubsub.PubSub
 	broadcast string
 
-	count uint64
+	count       uint64
+	connections cmap.ConcurrentMap
 }
 
 // Info returns the accociated plugins plugin.Info.
@@ -74,6 +82,7 @@ func (p *PubsPlugin) Initialize(ctx context.Context, errCh chan<- error, srv plu
 	p.srv = srv
 
 	p.handler = p.addRoutes(ctx, mux.NewRouter())
+	p.keys = cmap.New()
 	p.upgrader = &websocket.Upgrader{
 		ReadBufferSize:  websocketReadBufferSize,
 		WriteBufferSize: websocketWriteBufferSize,
@@ -99,6 +108,22 @@ func (p *PubsPlugin) Initialize(ctx context.Context, errCh chan<- error, srv plu
 	p.pubsub = pubsub.New(256) //TODO(longsleep): Add capacity to configuration.
 	p.broadcast = rndm.GenerateRandomString(32)
 
+	p.connections = cmap.New()
+
+	// Cleanup function.
+	go func() {
+		ticker := time.NewTicker(connectCleanupInterval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				p.purgeExpiredKeys()
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
 	srv.Logger().WithField("broadcast", p.broadcast).Debugf("pubs: initialize with %d bit key", len(hashKey)*8)
 
 	return nil
@@ -111,6 +136,37 @@ func (p *PubsPlugin) Close() error {
 	p.pubsub.Shutdown()
 
 	return nil
+}
+
+// NumActive returns the number of the currently active connections.
+func (p *PubsPlugin) NumActive() uint64 {
+	n := p.connections.Count()
+	p.srv.Logger().Debugf("active connections: %d", n)
+	return uint64(n)
+}
+
+type keyRecord struct {
+	when time.Time
+	user *userRecord
+}
+
+func (p *PubsPlugin) purgeExpiredKeys() {
+	expired := make([]string, 0)
+	deadline := time.Now().Add(-connectExpiration)
+	var record *keyRecord
+	for entry := range p.keys.IterBuffered() {
+		record = entry.Val.(*keyRecord)
+		if record.when.Before(deadline) {
+			expired = append(expired, entry.Key)
+		}
+	}
+	for _, key := range expired {
+		p.keys.Remove(key)
+	}
+}
+
+type userRecord struct {
+	id string
 }
 
 // Register is the exported registration entry point as loaded by Kopano API to

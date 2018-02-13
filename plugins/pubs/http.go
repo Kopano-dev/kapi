@@ -42,7 +42,8 @@ func (p *PubsPlugin) addRoutes(ctx context.Context, router *mux.Router) http.Han
 		Name(webhookRouterIdentifier)
 	v1.Handle("/webhook", p.srv.AccessTokenRequired(p.MakeHTTPWebhookRegisterHandler(v1))).
 		Methods(http.MethodPost)
-	v1.HandleFunc("/stream/websocket", p.HTTPWebsocketHandler).
+	v1.Handle("/stream/connect", p.srv.AccessTokenRequired(p.MakeHTTPWebsocketConnectHandler(v1)))
+	v1.HandleFunc("/stream/websocket/{key}", p.HTTPWebsocketHandler).
 		Methods(http.MethodGet).
 		Name(websocketRouteIdentifier)
 
@@ -93,6 +94,36 @@ func (p *PubsPlugin) MakeHTTPWebhookPublishHandler(router *mux.Router) http.Hand
 	})
 }
 
+// MakeHTTPWebsocketConnectHandler createss the HTTP handler for rtm.connect.
+func (p *PubsPlugin) MakeHTTPWebsocketConnectHandler(router *mux.Router) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		// create random URL to websocket endpoint
+		key, err := p.handleWebsocketConnect(req.Context())
+		if err != nil {
+			p.srv.Logger().WithError(err).Errorln("pubs: stream websocket connect failed")
+			http.Error(rw, "", http.StatusInternalServerError)
+			return
+		}
+
+		route := router.Get(websocketRouteIdentifier)
+		websocketURI, err := route.URLPath("key", key)
+		if err != nil {
+			p.srv.Logger().WithError(err).Errorln("pubs: stream websocket connect url generation failed")
+			http.Error(rw, "", http.StatusInternalServerError)
+			return
+		}
+
+		response := &streamWebsocketConnectResponse{
+			StreamURL: websocketURI.String(),
+		}
+
+		err = WriteJSON(rw, http.StatusOK, response, "")
+		if err != nil {
+			p.srv.Logger().WithError(err).Errorln("pubs: failed to write JSON response")
+		}
+	})
+}
+
 // HTTPWebsocketHandler implements the HTTP handler for stream websocket requests.
 func (p *PubsPlugin) HTTPWebsocketHandler(rw http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
@@ -100,7 +131,14 @@ func (p *PubsPlugin) HTTPWebsocketHandler(rw http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	err := p.handleWebsocketConnect(req.Context(), "", rw, req)
+	vars := mux.Vars(req)
+	key, ok := vars["key"]
+	if !ok {
+		http.NotFound(rw, req)
+		return
+	}
+
+	err := p.handleWebsocketConnection(req.Context(), key, rw, req)
 	if err != nil {
 		p.srv.Logger().WithError(err).Errorln("pubs: stream websocket connection failed")
 		http.Error(rw, "", http.StatusInternalServerError)

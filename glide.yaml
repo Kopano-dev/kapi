@@ -30,3 +30,4 @@ import:
 - package: github.com/gorilla/securecookie
   version: v1.1
 - package: github.com/cskr/pubsub
+- package: github.com/orcaman/concurrent-map

@@ -11,7 +11,15 @@ the key should not change and can be provided as hex encoded value by the
 `KOPANO_PUBS_SECRET_KEY` environment variable. A suitable key value can be created
 with with `openssl rand -hex 64`.
 
-## HTTP API
+## HTTP API v1
+
+The base URL to this API is `/api/pubs/v1`. All example URLs are sub paths of
+this base URL.
+
+### Authentication
+
+All endpoints of the Pubs API require [OAuth2 Bearer authentication](https://tools.ietf.org/html/rfc6750#section-2.1) with an access
+token (if not stated otherwise).
 
 ### Register webhook pub URL
 
@@ -20,6 +28,8 @@ Registers a new webhook URL to publish data to a certain topic.
 ```
 POST /webhook?topic=optional-client-provided-topic
 201
+```
+```
 {
 	"id": "${id}",
 	"pubUrl": "/api/pubs/v1/webhook/${topic-and-webhook-token-id}",
@@ -33,9 +43,9 @@ parameter, a unique secure random topic is generated and returned.
 
 ### Webhook pub
 
-Publish data to a previously registered webhook URL. Optionally the data is
-enclosed into a JSON structure. The topic is encoded inside the URL token and
-cannot be changed.
+Publish data to a previously registered webhook URL. Authorization and topic are
+encoded inside the token and cannot be changed. Thus the webhook pub endpoints
+do not require additional Bearer authentication.
 
 ```
 POST /webhook/${id}/${topic-and-webhook-token}
@@ -43,13 +53,36 @@ POST /webhook/${id}/${topic-and-webhook-token}/${envelope}
 204
 ```
 
-### Websocket stream
+Optionally the data is enclosed into a JSON structure with a type matching the
+value of the subpath `envelope`.
 
-Websocket stream can be used to interact with pubs pub/sub.
+### Websocket bi-directional event stream
+
+Websocket stream can be used to interact with pubs pub/sub. To retrieve the
+address for Websocket streaming, issue an authenticated request to the
+`/stream/connect` endpoint.
 
 ```
-GET /stream (Websocket)
+GET /stream/connect
+200
 ```
+```
+{
+  "streamUrl": "/api/pubs/v1/stream/websocket/ap1L3rNzuC9uWc07FT3QJCDZ1Q8PjLoV"
+}
+```
+
+The `streamUrl` is a one URL to use for Websocket streaming. It can be used
+exactly one time. Further connects will result in 404. If the connection is
+lost, call connect again. The Websocket stream URL does not require Bearer
+authentication.
+
+```
+GET /stream/${key} (Websocket)
+101
+```
+
+The `key` is part of the URL received from a previous call to `/stream/connect`.
 
 #### Websocket payload data
 
@@ -107,7 +140,6 @@ The `data` value of the `event` type is entirely controlled by the trigger, and
 thus is application specific. For simplicity in client implementations it is
 recommended to always use a JSON object for `data` together with a `type` key
 so applications can easily handle incoming messages.
-
 
 ### Usage examples
 

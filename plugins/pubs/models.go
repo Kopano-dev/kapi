@@ -43,6 +43,10 @@ type webhookRegisterResponse struct {
 	PubURL string `json:"pubUrl"`
 }
 
+type streamWebsocketConnectResponse struct {
+	StreamURL string `json:"streamUrl"`
+}
+
 type streamEnvelope struct {
 	Type  string          `json:"type"`
 	Data  json.RawMessage `json:"data,omitempty"`

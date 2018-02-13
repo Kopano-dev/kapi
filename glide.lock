@@ -1,5 +1,5 @@
-hash: be4d6a93068ca286cffd789f2bb87fa3d700c4a7ea02dcabff48ef8fa98c89c7
-updated: 2018-02-12T16:39:11.252021895+01:00
+hash: f50608690ab920dc3785b5dd705ab5502c40581ce0f7aa9067c57e93e14e2dcf
+updated: 2018-02-13T15:19:44.542421616+01:00
 imports:
 - name: github.com/aead/chacha20
   version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
@@ -79,6 +79,8 @@ imports:
 - name: github.com/miekg/dns
   version: 0f3adef2e2201d72e50309a36fc99d8a9d1a4960
   repo: https://github.com/miekg/dns
+- name: github.com/orcaman/concurrent-map
+  version: 2ae17bc4c860c83513ee50feb9746f3e50d7515d
 - name: github.com/rs/cors
   version: 7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6
 - name: github.com/russross/blackfriday
