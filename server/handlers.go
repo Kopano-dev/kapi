@@ -26,7 +26,14 @@ import (
 	"stash.kopano.io/kc/konnect"
 	"stash.kopano.io/kc/konnect/oidc"
 
+	"stash.kopano.io/kc/kopano-api/auth"
 	"stash.kopano.io/kc/kopano-api/proxy"
+)
+
+const (
+	// AuthRequestHeaderName defines the request header which holds the ID of
+	// the authenticated user.
+	AuthRequestHeaderName = "X-Kopano-UserEntryID"
 )
 
 // HealthCheckHandler a http handler return 200 OK when server health is fine.
@@ -40,18 +47,19 @@ func (s *Server) AccessTokenRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		var err error
 		var claims *konnect.AccessTokenClaims
+		var authenticatedUserID string
 
 		// TODO(longsleep): This code should be at a central location. It can
 		// also be found in konnect.
-		auth := strings.SplitN(req.Header.Get("Authorization"), " ", 2)
-		switch auth[0] {
+		authHeader := strings.SplitN(req.Header.Get("Authorization"), " ", 2)
+		switch authHeader[0] {
 		case oidc.TokenTypeBearer:
-			if len(auth) != 2 {
+			if len(authHeader) != 2 {
 				err = oidc.NewOAuth2Error(oidc.ErrorOAuth2InvalidRequest, "Invalid Bearer authorization header format")
 				break
 			}
 			claims = &konnect.AccessTokenClaims{}
-			_, err = jwt.ParseWithClaims(auth[1], claims, func(token *jwt.Token) (interface{}, error) {
+			_, err = jwt.ParseWithClaims(authHeader[1], claims, func(token *jwt.Token) (interface{}, error) {
 				// TODO(longsleep): validate!
 
 				return nil, errors.New("validate of tokens not implemented")
@@ -71,16 +79,27 @@ func (s *Server) AccessTokenRequired(next http.Handler) http.Handler {
 		}
 
 		if claims != nil && claims.IsAccessToken {
-			// Use sub
-			req.Header.Set("X-Kopano-UserEntryID", claims.Subject)
-			//s.logger.WithField("UserEntryID", req.Header.Get("X-Kopano-UserEntryID")).Debugln("proxy with auth")
+			// TODO(longsleep): Support cases where the Subject is not a user entry ID.
+			authenticatedUserID = claims.Subject
 		} else {
 			err = errors.New("missing access token claim")
 		}
 
-		if err != nil && req.Header.Get("X-Kopano-UserEntryID") != "" {
-			// XXX(longsleep): This allows insecure pass through of auth data. Remove this!
-			err = nil
+		if err != nil {
+			if s.allowAuthPassthrough {
+				// NOTE(longsleep): Check for pass through of auth data.
+				authenticatedUserID = req.Header.Get(AuthRequestHeaderName)
+				if authenticatedUserID != "" {
+					err = nil
+				}
+			}
+		}
+
+		if err == nil && authenticatedUserID != "" {
+			req.Header.Set(AuthRequestHeaderName, authenticatedUserID)
+			req = req.WithContext(auth.ContextWithAuthenticatedUserID(req.Context(), authenticatedUserID))
+		} else {
+			req.Header.Del(AuthRequestHeaderName)
 		}
 
 		if err != nil {

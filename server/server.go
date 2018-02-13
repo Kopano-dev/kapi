@@ -43,7 +43,8 @@ type Server struct {
 	plugins        []plugins.PluginV1
 	enabledPlugins map[string]bool
 
-	requestLog bool
+	requestLog           bool
+	allowAuthPassthrough bool
 }
 
 // NewServer creates a new Server with the provided parameters.
@@ -53,7 +54,9 @@ func NewServer(listenAddr string, pluginsPath string, enabledPlugins map[string]
 		pluginsPath:    pluginsPath,
 		enabledPlugins: enabledPlugins,
 		logger:         logger,
-		requestLog:     os.Getenv("DEBUG_SERVER_REQUEST_LOG") == "1",
+
+		requestLog:           os.Getenv("KOPANO_DEBUG_SERVER_REQUEST_LOG") == "1",
+		allowAuthPassthrough: os.Getenv("KOPANO_ALLOW_AUTH_PASSTHROUGH") == "1",
 	}
 
 	s.loadPlugins()
