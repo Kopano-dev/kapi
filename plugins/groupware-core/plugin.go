@@ -87,7 +87,7 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 
 	// Start looking for rest sockets asynchronously to allow them to start later.
 	go func() {
-		pr, err := p.initializeProxy(ctx, socketPath, "mfr*.sock")
+		pr, err := p.initializeProxy(ctx, socketPath, "rest*.sock")
 		if err != nil {
 			errCh <- err
 			return
