@@ -9,3 +9,4 @@ __pycache__
 /test/tests.*
 /golint.txt
 /govet.txt
+/3rdparty-LICENSES.md
