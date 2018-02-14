@@ -6,3 +6,6 @@
 /dist
 /Caddyfile
 __pycache__
+/test/tests.*
+/golint.txt
+/govet.txt

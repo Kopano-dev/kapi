@@ -100,7 +100,7 @@ $(TEST_XML_TARGETS): test-xml
 test-xml: vendor | $(BASE) ; $(info running $(NAME:%=% )tests ...)	@
 	@mkdir -p test
 	cd $(BASE) && 2>&1 CGO_ENABLED=$(CGO_ENABLED) $(GO) test -timeout $(TIMEOUT)s $(ARGS) -v $(TESTPKGS) | tee test/tests.output
-	$(GO2XUNIT) -fail -input test/tests.output -output test/tests.xml
+	$(shell test -s test/tests.output && $(GO2XUNIT) -fail -input test/tests.output -output test/tests.xml)
 
 # Glide
 
