@@ -197,14 +197,17 @@
 </div>
 </section>
 
-<section class="section" v-if="user">
+<section class="section" v-if="user && webhook && webhook.id">
 <div class="container">
 	<h3 class="subtitle">Create subscription</h3>
 
-	<label class="label">Resource</label>
-	<div class="field">
+	<label class="label">Resource / Webhook topic</label>
+	<div class="field has-addons">
 		<p class="control is-expanded">
 			<input class="input" type="text" v-model="requestContext" >
+		</p>
+		<p class="control">
+			<input class="input" type="text" disabled v-model="webhook.topic" >
 		</p>
 	</div>
 
@@ -212,9 +215,9 @@
 		<button :disabled="!requestContext" class="button" v-on:click="createSubscription">Create subscription</button>
 	</div>
 
-	<article class="message" v-bind:class="{'is-success': subscriptionStatus.success, 'is-error': !createStatus.success}" v-if="subscriptionStatus">
+	<article class="message" v-bind:class="{'is-success': subscriptionStatus.success, 'is-error': !subscriptionStatus.success}" v-if="subscriptionStatus">
 	  <div class="message-body">
-		{{subscriptionStatus.success ? '&#10003; Success' : '&#10060; Failed'}} - Status Code {{subscriptionStatus.code}}<span v-if="createStatus.msg"> : {{ subscriptionStatus.msg }}</span> <strong style="padding-left:4em">{{subscriptionStatus.duration}}ms</strong>
+		{{subscriptionStatus.success ? '&#10003; Success' : '&#10060; Failed'}} - Status Code {{subscriptionStatus.code}}<span v-if="subscriptionStatus.msg"> : {{ subscriptionStatus.msg }}</span> <strong style="padding-left:4em">{{subscriptionStatus.duration}}ms</strong>
 	  </div>
   </article>
 </div>

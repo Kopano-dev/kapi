@@ -31,6 +31,7 @@ window.app = new Vue({
 		prompt: null,
 
 		apiPrefix: '/api/gc/v0',
+		pubsPrefix: '/api/pubs/v1',
 
 		requestTab: '',
 		requestKey: null,
@@ -55,6 +56,10 @@ window.app = new Vue({
 
 		createStatus: null,
 		subscriptionStatus: null,
+		subscriptions: {},
+
+		webhook: null,
+		webhookClientState: 'whcs-' + new Date().getTime()
 	},
 	components: {
 	},
@@ -137,6 +142,7 @@ window.app = new Vue({
 		user: function(user) {
 			if (user) {
 				this.expires_in = user.expires_in;
+				Vue.http.headers.common['Authorization'] = user.token_type + ' ' + user.access_token;
 			}
 		},
 		requestTab: function(val) {
@@ -215,11 +221,11 @@ window.app = new Vue({
 			});
 			mgr.events.addUserLoaded(user => {
 				console.log('user loaded', user);
-				this.user = user;
+				this.updateUser(user);
 			});
 			mgr.events.addUserUnloaded(() => {
 				console.log('user unloaded');
-				this.user = null;
+				this.updateUser(null);
 			});
 			mgr.events.addSilentRenewError(err => {
 				console.log('user silent renew error', err.error);
@@ -268,7 +274,7 @@ window.app = new Vue({
 		uninitialize: function() {
 			this.userManager.removeUser().then(() => {
 				this.userNamanger = null;
-				this.user = null;
+				this.updateUser(null);
 				this.initialized = false;
 			});
 		},
@@ -279,32 +285,36 @@ window.app = new Vue({
 
 		completeAuthentication: async function() {
 			return this.userManager.signinRedirectCallback().then(user => {
-				this.user = user;
-
-				return user;
+				return this.updateUser(user);
 			});
 		},
 
 		getUser: async function() {
-			return this.userManager.getUser().then((user) => {
-				this.user = user;
-
-				if (user) {
-					Vue.http.headers.common['Authorization'] = user.token_type + ' ' + user.access_token;
-				}
-				return user;
+			return this.userManager.getUser().then(async (user) => {
+				return this.updateUser(user);
 			}).catch((err) => {
 				console.error('failed to get user', err);
-				this.user = null;
-
-				return null;
+				return this.updateUser(null);
 			});
 		},
 
 		removeUser: async function() {
 			return this.userManager.removeUser().then(() => {
-				this.user = null;
+				return this.updateUser(null);
 			});
+		},
+
+		updateUser: async function(user) {
+			console.log('user updated', user);
+			if (user) {
+				Vue.http.headers.common['Authorization'] = user.token_type + ' ' + user.access_token;
+				if (!this.webhook) {
+					this.registerWebhook();
+				}
+			}
+			this.user = user;
+
+			return user;
 		},
 
 		querySessionStatus: async function() {
@@ -337,15 +347,17 @@ window.app = new Vue({
 				}
 
 				// Whoohoo success.
-				response.text().then(t => {
-					this.requestResponse = t;
-				});
 				this.requestResponseHeaders = response.headers.map;
 				this.requestStatus = {
 					success: response.status >= 200 && response.status < 300,
 					code: response.status,
 					duration: (new Date()) - start
 				};
+
+				this.requestResponse = response.bodyText;
+				if (response.bodyText === '') {
+					return '';
+				}
 				return response.json();
 			}).catch(response => {
 				response.text().then(t => {
@@ -372,15 +384,17 @@ window.app = new Vue({
 				}
 
 				// Whoohoo success.
-				response.text().then(t => {
-					this.requestResponse = t;
-				});
 				this.requestResponseHeaders = response.headers.map;
 				this.requestStatus = {
 					success: response.status >= 200 && response.status < 300,
 					code: response.status,
 					duration: (new Date()) - start
 				};
+
+				this.requestResponse = response.bodyText;
+				if (response.bodyText === '') {
+					return '';
+				}
 				return response.json();
 			}).catch(response => {
 				response.text().then(t => {
@@ -523,6 +537,24 @@ window.app = new Vue({
 			})
 		},
 
+		registerWebhook: async function() {
+			return this.$http.post(this.pubsPrefix + '/webhook').then(response => {
+				if (response.headers.get('content-type').indexOf('application/json') !== 0) {
+					// Require JSON response, everything else is an error.
+					throw response;
+				}
+
+				// Whoohoo success.
+				return response.json();
+			}).catch(response => {
+				console.error('failed to register webhook', response);
+				return {};
+			}).then(webhook => {
+				this.webhook = webhook;
+				console.info('webhook registered', webhook);
+			});
+		},
+
 		createSubscription: async function() {
 			console.log('create subscription', this.requestContext);
 
@@ -534,14 +566,37 @@ window.app = new Vue({
 				"changeType": changeType,
 				"resource": resource,
 				"expirationDateTime": expirationDateTime,
-				"clientState": "subscription-identifier"
+				"clientState": this.webhookClientState,
+				"notificationUrl": qualifyURL(this.webhook.pubUrl),
 			}
 
-			return this.gcPost(this.apiPrefix + '/subscriptions', payload).then(response => {
-				this.subscriptionStatus = this.requestStatus;
+			this.subscriptionStatus = null;
+			const start = new Date();
+			return this.$http.post(this.apiPrefix + '/subscriptions', payload).then(response => {
+				if (response.headers.get('content-type').indexOf('application/json') !== 0) {
+					// Require JSON response, everything else is an error.
+					throw response;
+				}
 
-				return response;
-			})
+				this.subscriptionStatus = {
+					success: response.status >= 200 && response.status < 300,
+					code: response.status,
+					duration: (new Date()) - start
+				};
+				return response.json();
+			}).catch(response => {
+				console.error('failed to subscribe', response);
+				this.subscriptionStatus = {
+					success: false,
+					code: response.status || 0,
+					msg: ''+response,
+					duration: (new Date()) - start
+				};
+				return {};
+			}).then(subscription => {
+				this.subscriptions[resource] = subscription;
+				console.info('subscribed', resource, subscription);
+			});
 		}
 
 	}
