@@ -10,3 +10,4 @@ __pycache__
 /golint.txt
 /govet.txt
 /3rdparty-LICENSES.md
+/examples/pubsjs

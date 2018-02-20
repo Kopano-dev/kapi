@@ -59,7 +59,9 @@ window.app = new Vue({
 		subscriptions: {},
 
 		webhook: null,
-		webhookClientState: 'whcs-' + new Date().getTime()
+		webhookClientState: 'whcs-' + new Date().getTime(),
+
+		pubs: null,
 	},
 	components: {
 	},
@@ -311,6 +313,10 @@ window.app = new Vue({
 				if (!this.webhook) {
 					this.registerWebhook();
 				}
+				if (!this.pubs) {
+					Pubs.init({authorizationValue: user.access_token, authorizationType: user.token_type});
+					this.connectPubs();
+				}
 			}
 			this.user = user;
 
@@ -341,12 +347,6 @@ window.app = new Vue({
 			const start = new Date();
 
 			return this.$http.get(url, options).then(response => {
-				if (response.headers.get('content-type').indexOf('application/json') !== 0) {
-					// Require JSON response, everything else is an error.
-					throw response;
-				}
-
-				// Whoohoo success.
 				this.requestResponseHeaders = response.headers.map;
 				this.requestStatus = {
 					success: response.status >= 200 && response.status < 300,
@@ -355,10 +355,11 @@ window.app = new Vue({
 				};
 
 				this.requestResponse = response.bodyText;
-				if (response.bodyText === '') {
-					return '';
+				if (response.headers.get('content-type').indexOf('application/json') === 0) {
+					return response.json();
+				} else {
+					return response.text();
 				}
-				return response.json();
 			}).catch(response => {
 				response.text().then(t => {
 					this.requestResponse = t;
@@ -378,12 +379,6 @@ window.app = new Vue({
 			const start = new Date();
 
 			return this.$http.post(url, body, options).then(response => {
-				if (response.headers.get('content-type').indexOf('application/json') !== 0) {
-					// Require JSON response, everything else is an error.
-					throw response;
-				}
-
-				// Whoohoo success.
 				this.requestResponseHeaders = response.headers.map;
 				this.requestStatus = {
 					success: response.status >= 200 && response.status < 300,
@@ -392,10 +387,11 @@ window.app = new Vue({
 				};
 
 				this.requestResponse = response.bodyText;
-				if (response.bodyText === '') {
-					return '';
+				if (response.headers.get('content-type').indexOf('application/json') === 0) {
+					return response.json();
+				} else {
+					return response.text();
 				}
-				return response.json();
 			}).catch(response => {
 				response.text().then(t => {
 					this.requestResponse = t;
@@ -549,10 +545,33 @@ window.app = new Vue({
 			}).catch(response => {
 				console.error('failed to register webhook', response);
 				return {};
-			}).then(webhook => {
+			}).then(async webhook => {
 				this.webhook = webhook;
 				console.info('webhook registered', webhook);
+				if (this.pubs) {
+					// Subscribe our webhooks topic.
+					const topic = this.webhook.topic;
+					console.info('pubs subscribing webhook topic', topic);
+					await this.pubs.sub([topic]);
+					console.log('pubs subscribed', topic);
+				}
 			});
+		},
+
+		connectPubs: async function() {
+			const pubs = new Pubs();
+			await pubs.connect();
+			this.pubs = pubs;
+			if (this.webhook && this.webhook.topic) {
+				// Subscribe to webhook topic.
+				const topic = this.webhook.topic;
+				console.info('pubs subscribing webhook topic to newly created pubs', topic);
+				pubs.onstreamevent = (event) => {
+					console.log('pubs stream event', event.data, event.info, event);
+				}
+				await this.pubs.sub([topic]);
+				console.log('pubs subscribed', topic);
+			}
 		},
 
 		createSubscription: async function() {
