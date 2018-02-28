@@ -3,7 +3,7 @@ This is a simple Molotov https://molotov.readthedocs.io/ script to bang
 the Kopano API server with various scenarios.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import os
 
@@ -15,7 +15,12 @@ _GCAPI = '%s/api/gc/v0' % _API
 _HEADERS = {
     'X-Request-With-Molotov': '1'
 }
-_ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
+_ACCESS_TOKEN = os.environ.get('TOKEN_VALUE')
+
+
+def last_day_of_month(any_day):
+    next_month = any_day.replace(day=28) + timedelta(days=4)  # this will never fail
+    return next_month - timedelta(days=next_month.day)
 
 
 @global_setup()
@@ -71,6 +76,17 @@ async def scenario_gc_me_messages(session):
         assert res.get('@odata.context', '').endswith('/me/messages')
 
 
+@scenario(weight=20)
+async def scenario_gc_me_calendar_calendarView(session):
+    startDateTime = (datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)).replace(day=1)
+    endDateTime = last_day_of_month(datetime.now().replace(day=28, hour=0, minute=0, second=0, microsecond=0) + timedelta(days=4))
+
+    async with session.get("%s/me/calendar/calendarView?startDateTime=%s&endDateTime=%s" % (_GCAPI, startDateTime.isoformat(), endDateTime.isoformat())) as resp:
+        assert resp.status == 200, "HTTP response status: %d" % resp.status
+        res = await resp.json()
+        assert res.get('@odata.context', '').endswith('/me/calendar/calendarView')
+
+
 @scenario(weight=30)
 async def scenario_gc_me_sendMail(session):
     me = get_var('me')
@@ -93,4 +109,4 @@ async def scenario_gc_me_sendMail(session):
         }
     }
     async with session.post("%s/me/sendMail" % _GCAPI, data=json.dumps(data)) as resp:
-        assert resp.status == 200, "HTTP response status: %d" % resp.status
+        assert resp.status == 202, "HTTP response status: %d" % resp.status
