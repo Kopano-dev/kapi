@@ -433,7 +433,12 @@ window.app = new Vue({
 				}
 			}
 
-			return this.doRequest(this.apiPrefix + endpoint, key);
+			let url = endpoint;
+			if (url === '/me/calendar/calendarView') {
+				url += '?startDateTime=2017-02-26T09:13:19.540&endDateTime=2018-03-05T09:13:19.540';
+			}
+
+			return this.doRequest(this.apiPrefix + url, key);
 		},
 
 		doRequest: async function(url, requestKey) {
