@@ -81,7 +81,7 @@ async def scenario_gc_me_calendar_calendarView(session):
     startDateTime = (datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)).replace(day=1)
     endDateTime = last_day_of_month(datetime.now().replace(day=28, hour=0, minute=0, second=0, microsecond=0) + timedelta(days=4))
 
-    async with session.get("%s/me/calendar/calendarView?startDateTime=%s&endDateTime=%s" % (_GCAPI, startDateTime.isoformat(), endDateTime.isoformat())) as resp:
+    async with session.get("%s/me/calendar/calendarView?startDateTime=%s&endDateTime=%s&$select=subject,isAllDay,start,end" % (_GCAPI, startDateTime.isoformat(), endDateTime.isoformat())) as resp:
         assert resp.status == 200, "HTTP response status: %d" % resp.status
         res = await resp.json()
         assert res.get('@odata.context', '').endswith('/me/calendar/calendarView')
