@@ -105,6 +105,10 @@ func (p *PubsPlugin) Initialize(ctx context.Context, errCh chan<- error, srv plu
 	p.cookie = securecookie.New(hashKey, nil)
 	p.cookie.MaxAge(0)
 
+	if len(hashKey) < 32 {
+		return fmt.Errorf("pubs: secret key too small, at least 32 bytes are required")
+	}
+
 	p.pubsub = pubsub.New(256) //TODO(longsleep): Add capacity to configuration.
 	p.broadcast = rndm.GenerateRandomString(32)
 
@@ -124,7 +128,7 @@ func (p *PubsPlugin) Initialize(ctx context.Context, errCh chan<- error, srv plu
 		}
 	}()
 
-	srv.Logger().WithField("broadcast", p.broadcast).Debugf("pubs: initialize with %d bit key", len(hashKey)*8)
+	srv.Logger().WithField("broadcast", p.broadcast).Debugf("pubs: initialize with %d bits HMAC-SHA256 key", len(hashKey)*8)
 
 	return nil
 }
