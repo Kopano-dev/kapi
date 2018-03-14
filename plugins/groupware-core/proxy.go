@@ -73,7 +73,7 @@ func (p *KopanoGroupwareCorePlugin) initializeProxy(ctx context.Context, socketP
 		}
 
 		if err != nil {
-			p.srv.Logger().WithError(err).Warnln("groupware-core: waiting for proxy %s files to appear", pattern)
+			p.srv.Logger().WithError(err).Warnf("groupware-core: waiting for proxy %s files to appear", pattern)
 		}
 
 		select {
