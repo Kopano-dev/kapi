@@ -26,8 +26,8 @@ import (
 	"stash.kopano.io/kc/konnect"
 	"stash.kopano.io/kc/konnect/oidc"
 
-	"stash.kopano.io/kc/kopano-api/auth"
-	"stash.kopano.io/kc/kopano-api/proxy"
+	"stash.kopano.io/kc/kapi/auth"
+	"stash.kopano.io/kc/kapi/proxy"
 )
 
 const (

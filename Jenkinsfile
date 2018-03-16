@@ -34,7 +34,7 @@ pipeline {
 			steps {
 				echo 'Building..'
 				sh 'make'
-				sh './bin/kopano-apid version'
+				sh './bin/kapid version'
 			}
 		}
 		stage('Test') {

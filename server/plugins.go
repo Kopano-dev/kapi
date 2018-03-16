@@ -26,7 +26,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"stash.kopano.io/kc/kopano-api/plugins"
+	"stash.kopano.io/kc/kapi/plugins"
 )
 
 func (s *Server) loadPlugins() error {

@@ -33,7 +33,7 @@ import (
 	"stash.kopano.io/kgol/rndm"
 	"stash.kopano.io/kwm/kwmserver/signaling/api-v1/connection"
 
-	"stash.kopano.io/kc/kopano-api/auth"
+	"stash.kopano.io/kc/kapi/auth"
 )
 
 // Buffer sizes for HTTP webhook requests.

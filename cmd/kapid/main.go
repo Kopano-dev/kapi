@@ -27,8 +27,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"stash.kopano.io/kc/kopano-api/cmd"
-	"stash.kopano.io/kc/kopano-api/server"
+	"stash.kopano.io/kc/kapi/cmd"
+	"stash.kopano.io/kc/kapi/server"
 )
 
 func main() {

@@ -22,8 +22,8 @@ import (
 	"errors"
 	"net/http"
 
-	"stash.kopano.io/kc/kopano-api/plugins"
-	"stash.kopano.io/kc/kopano-api/version"
+	"stash.kopano.io/kc/kapi/plugins"
+	"stash.kopano.io/kc/kapi/version"
 )
 
 var pluginInfo = &plugins.InfoV1{

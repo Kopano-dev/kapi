@@ -1,4 +1,4 @@
-package: stash.kopano.io/kc/kopano-api
+package: stash.kopano.io/kc/kapi
 import:
 - package: github.com/longsleep/go-metrics
   subpackages:

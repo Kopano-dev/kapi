@@ -15,4 +15,4 @@
  *
  */
 
-package api
+package kapi // import "stash.kopano.io/kc/kapi"

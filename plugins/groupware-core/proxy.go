@@ -25,8 +25,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"stash.kopano.io/kc/kopano-api/proxy"
-	"stash.kopano.io/kc/kopano-api/proxy/httpproxy"
+	"stash.kopano.io/kc/kapi/proxy"
+	"stash.kopano.io/kc/kapi/proxy/httpproxy"
 )
 
 var restProxyConfiguration = &httpproxy.Configuration{

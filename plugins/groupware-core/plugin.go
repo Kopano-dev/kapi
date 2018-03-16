@@ -28,9 +28,9 @@ import (
 
 	"github.com/rs/cors"
 
-	"stash.kopano.io/kc/kopano-api/plugins"
-	"stash.kopano.io/kc/kopano-api/proxy"
-	"stash.kopano.io/kc/kopano-api/version"
+	"stash.kopano.io/kc/kapi/plugins"
+	"stash.kopano.io/kc/kapi/proxy"
+	"stash.kopano.io/kc/kapi/version"
 )
 
 var pluginInfo = &plugins.InfoV1{

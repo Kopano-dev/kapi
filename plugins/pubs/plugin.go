@@ -32,8 +32,8 @@ import (
 	"github.com/orcaman/concurrent-map"
 	"stash.kopano.io/kgol/rndm"
 
-	"stash.kopano.io/kc/kopano-api/plugins"
-	"stash.kopano.io/kc/kopano-api/version"
+	"stash.kopano.io/kc/kapi/plugins"
+	"stash.kopano.io/kc/kapi/version"
 )
 
 // Buffer sizes for websocket payload data.

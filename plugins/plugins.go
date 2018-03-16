@@ -23,7 +23,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"stash.kopano.io/kc/kopano-api/proxy"
+	"stash.kopano.io/kc/kapi/proxy"
 )
 
 // RegisterPluginV1 is the register function plugins needs to expose as Register

@@ -31,7 +31,7 @@ import (
 	"github.com/longsleep/go-metrics/timing"
 	"github.com/sirupsen/logrus"
 
-	"stash.kopano.io/kc/kopano-api/plugins"
+	"stash.kopano.io/kc/kapi/plugins"
 )
 
 // Server represents the base for a HTTP server.

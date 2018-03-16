@@ -25,7 +25,7 @@ import (
 	"github.com/mholt/caddy/caddyfile"
 	caddyproxy "github.com/mholt/caddy/caddyhttp/proxy"
 
-	"stash.kopano.io/kc/kopano-api/proxy"
+	"stash.kopano.io/kc/kapi/proxy"
 )
 
 var configurationTemplate = template.Must(template.New("Caddyfile").Parse(`

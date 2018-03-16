@@ -23,7 +23,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"stash.kopano.io/kc/kopano-api/version"
+	"stash.kopano.io/kc/kapi/version"
 )
 
 // CommandVersion provides the commandline implementation for version.

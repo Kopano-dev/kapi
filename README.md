@@ -14,7 +14,7 @@ installed as well.
 ```
 mkdir -p ~/go/src/stash.kopano.io/kc
 cd ~/go/src/stash.kopano.io/kc
-git clone <THIS-PROJECT> kopano-api
+git clone <THIS-PROJECT> kapi
 cd kopano-api
 make
 ```
@@ -22,7 +22,7 @@ make
 ## Running Kopano API
 
 ```
-KOPANO_GC_REST_SOCKETS=/run/kopano/fleet-runner ./bin/kopano-apid serve \
+KOPANO_GC_REST_SOCKETS=/run/kopano/fleet-runner ./bin/kapid serve \
   --listen 127.0.0.1:8039 \
   --plugins-path=./plugins \
   --plugins=groupware-core
@@ -62,6 +62,6 @@ at 'plugins/pubs/README.md'.
 ## Run unit tests
 
 ```
-cd ~/go/src/stash.kopano.io/kc/kopano-api
+cd ~/go/src/stash.kopano.io/kc/kapi
 make test
 ```
