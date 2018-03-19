@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
@@ -30,6 +31,7 @@ import (
 	"github.com/longsleep/go-metrics/loggedwriter"
 	"github.com/longsleep/go-metrics/timing"
 	"github.com/sirupsen/logrus"
+	kcoidc "stash.kopano.io/kc/libkcoidc"
 
 	"stash.kopano.io/kc/kapi/plugins"
 )
@@ -39,21 +41,38 @@ type Server struct {
 	listenAddr  string
 	pluginsPath string
 	logger      logrus.FieldLogger
+	client      *http.Client
 
 	plugins        []plugins.PluginV1
 	enabledPlugins map[string]bool
+
+	iss      *url.URL
+	provider *kcoidc.Provider
 
 	requestLog           bool
 	allowAuthPassthrough bool
 }
 
 // NewServer creates a new Server with the provided parameters.
-func NewServer(listenAddr string, pluginsPath string, enabledPlugins map[string]bool, logger logrus.FieldLogger) *Server {
+func NewServer(listenAddr string, pluginsPath string, iss *url.URL, enabledPlugins map[string]bool, logger logrus.FieldLogger, client *http.Client) (*Server, error) {
+	if client == nil {
+		client = http.DefaultClient
+	}
+
+	provider, err := kcoidc.NewProvider(client, nil, false)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create kcoidc provider for server: %v", err)
+	}
+
 	s := &Server{
 		listenAddr:     listenAddr,
 		pluginsPath:    pluginsPath,
 		enabledPlugins: enabledPlugins,
 		logger:         logger,
+		client:         client,
+
+		iss:      iss,
+		provider: provider,
 
 		requestLog:           os.Getenv("KOPANO_DEBUG_SERVER_REQUEST_LOG") == "1",
 		allowAuthPassthrough: os.Getenv("KOPANO_ALLOW_AUTH_PASSTHROUGH") == "1",
@@ -61,7 +80,7 @@ func NewServer(listenAddr string, pluginsPath string, enabledPlugins map[string]
 
 	s.loadPlugins()
 
-	return s
+	return s, nil
 }
 
 // ServerHTTP implements the http.HandlerFunc interface.
@@ -148,6 +167,18 @@ func (s *Server) Serve(ctx context.Context) error {
 		if pluginErr := p.Initialize(serveCtx, errCh, s); pluginErr != nil {
 			return fmt.Errorf("failed to initialize plugin %T: %v", p, pluginErr)
 		}
+	}
+
+	// OpenID Connect.
+	err := s.provider.Initialize(serveCtx, s.iss)
+	if err != nil {
+		return fmt.Errorf("OIDC provider initialization error: %v", err)
+	}
+	if errOIDCInitialize := s.provider.WaitUntilReady(serveCtx, 10*time.Second); errOIDCInitialize != nil {
+		// NOTE(longsleep): Do not treat this as error - just log.
+		logger.WithError(errOIDCInitialize).WithField("iss", s.iss).Warnf("failed to initialize OIDC provider")
+	} else {
+		logger.WithField("iss", s.iss).Debugln("OIDC provider initialized")
 	}
 
 	// HTTP listener.

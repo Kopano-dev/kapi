@@ -22,9 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dgrijalva/jwt-go"
-	"stash.kopano.io/kc/konnect"
-	"stash.kopano.io/kc/konnect/oidc"
+	kcoidc "stash.kopano.io/kc/libkcoidc"
 
 	"stash.kopano.io/kc/kapi/auth"
 	"stash.kopano.io/kc/kapi/proxy"
@@ -46,43 +44,32 @@ func (s *Server) HealthCheckHandler(rw http.ResponseWriter, req *http.Request) {
 func (s *Server) AccessTokenRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		var err error
-		var claims *konnect.AccessTokenClaims
+
+		var claims *kcoidc.ExtraClaimsWithType
 		var authenticatedUserID string
 
 		// TODO(longsleep): This code should be at a central location. It can
 		// also be found in konnect.
 		authHeader := strings.SplitN(req.Header.Get("Authorization"), " ", 2)
 		switch authHeader[0] {
-		case oidc.TokenTypeBearer:
+		case "Bearer":
 			if len(authHeader) != 2 {
-				err = oidc.NewOAuth2Error(oidc.ErrorOAuth2InvalidRequest, "Invalid Bearer authorization header format")
+				err = errors.New("invalid Bearer authorization header format")
 				break
 			}
-			claims = &konnect.AccessTokenClaims{}
-			_, err = jwt.ParseWithClaims(authHeader[1], claims, func(token *jwt.Token) (interface{}, error) {
-				// TODO(longsleep): validate!
-
-				return nil, errors.New("validate of tokens not implemented")
-			})
-			err = nil //XXX(longsleep): Remove me once validation is implemented.
-			if err == nil {
-				// TODO(longsleep): Validate all claims.
-				err = claims.Valid()
-			}
-			if err != nil {
-				// Wrap as OAuth2 error.
-				err = oidc.NewOAuth2Error(oidc.ErrorOAuth2InvalidToken, err.Error())
-			}
+			authenticatedUserID, _, claims, err = s.provider.ValidateTokenString(req.Context(), authHeader[1])
 
 		default:
-			err = oidc.NewOAuth2Error(oidc.ErrorOAuth2InvalidRequest, "Bearer authorization required")
+			err = errors.New("Bearer authorization required")
 		}
 
-		if claims != nil && claims.IsAccessToken {
-			// TODO(longsleep): Support cases where the Subject is not a user entry ID.
-			authenticatedUserID = claims.Subject
-		} else {
-			err = errors.New("missing access token claim")
+		if err == nil {
+			if claims != nil && claims.KCTokenType() == kcoidc.TokenTypeKCAccess {
+				// TODO(longsleep): Support cases where the Subject is not a user entry ID.
+				err = claims.Valid()
+			} else {
+				err = errors.New("missing access token claim")
+			}
 		}
 
 		if err != nil {

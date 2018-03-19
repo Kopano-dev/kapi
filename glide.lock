@@ -1,5 +1,5 @@
-hash: 9ee66139be3984e0cc44e4e9c639899d03bb7bb3f3ca75892e9a2e474d9e5d0d
-updated: 2018-03-16T12:38:55.678840043+01:00
+hash: de364847825696845f0975b136358cf502adf2406a2645ed4f0f4a85b912575a
+updated: 2018-03-19T15:37:13.159665645+01:00
 imports:
 - name: github.com/aead/chacha20
   version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
@@ -16,16 +16,10 @@ imports:
 - name: github.com/flynn/go-shlex
   version: 3f9db97f856818214da2e1057f8ad84803971cff
   repo: https://github.com/flynn/go-shlex
-- name: github.com/google/go-querystring
-  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
-  subpackages:
-  - query
 - name: github.com/gorilla/context
   version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
 - name: github.com/gorilla/mux
   version: 53c1911da2b537f792e7cafcb446b05ffe33b996
-- name: github.com/gorilla/schema
-  version: 8b1100835db5bbdae88541510f70d114b91a7e4d
 - name: github.com/gorilla/securecookie
   version: 667fe4e3466a040b780561fe9b51a83a3753eefc
 - name: github.com/gorilla/websocket
@@ -101,6 +95,8 @@ imports:
   version: 2faea1465de239e4babd8f5905cc25b781712442
   subpackages:
   - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
   - hkdf
   - ocsp
   - ssh/terminal
@@ -115,7 +111,7 @@ imports:
   - lex/httplex
   - publicsuffix
 - name: golang.org/x/sys
-  version: 833a04a10549a95dc34458c195cbad61bbb6cb4d
+  version: 35ef4487ce0a1ea5d4b616ffe71e34febe723695
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -140,16 +136,17 @@ imports:
   subpackages:
   - cipher
   - json
-- name: stash.kopano.io/kc/konnect
-  version: 2662b5246386690d72ef1727a349955a0a917240
+- name: gopkg.in/square/go-jose.v2
+  version: 6ee92191fea850cdcab9a18867abf5f521cdbadb
   subpackages:
-  - oidc
-  - oidc/payload
-  - utils
+  - cipher
+  - json
+- name: stash.kopano.io/kc/libkcoidc
+  version: 3bf65c81aead72d2076386a9de2237e67d242cdb
 - name: stash.kopano.io/kgol/rndm
   version: 69ff9c69d5ce12d2fb19a552eab58ad657a5e8b2
 - name: stash.kopano.io/kwm/kwmserver
-  version: a3ef57c3325ef74b217ac417975d508520168fb4
+  version: 2b6cb3d93b31c8d255a853d774959ac7e3565831
   subpackages:
   - signaling/api-v1/connection
 testImports: []

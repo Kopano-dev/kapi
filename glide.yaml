@@ -13,8 +13,6 @@ import:
   subpackages:
   - caddyfile
   - caddyhttp/proxy
-- package: stash.kopano.io/kc/konnect
-  version: ^0.2.2
 - package: github.com/dgrijalva/jwt-go
   version: v3.1.0
 - package: github.com/rs/cors
@@ -31,3 +29,5 @@ import:
   version: v1.1
 - package: github.com/cskr/pubsub
 - package: github.com/orcaman/concurrent-map
+- package: stash.kopano.io/kc/libkcoidc
+  version: ~0.2.0
