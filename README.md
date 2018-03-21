@@ -25,7 +25,8 @@ make
 KOPANO_GC_REST_SOCKETS=/run/kopano/fleet-runner ./bin/kapid serve \
   --listen 127.0.0.1:8039 \
   --plugins-path=./plugins \
-  --plugins=groupware-core
+  --plugins=groupware-core \
+  --iss=https://mykonnect.local
 ```
 
 Where `--plugins-path` points to a folder containing Kopano API plugin modules.
@@ -36,6 +37,11 @@ The `--plugins` parameter can be used to select what plugins should be enabled.
 It takes a comma seperated value of plugin IDs as the plugin defined it during
 its build time. If the `--plugins` parameter is empty (the default), all plugins
 found will be activated.
+
+The `--iss` parameter points to an OpenID Connect issuer with support for 
+discovery (Kopano Konnect). On start, the service will try discover OIDC details
+and allow Bearer authentication with access tokens once successful. The `--iss`
+parameter is mandatory.
 
 ## Plugins
 
