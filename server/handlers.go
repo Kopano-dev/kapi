@@ -32,6 +32,9 @@ const (
 	// AuthRequestHeaderName defines the request header which holds the ID of
 	// the authenticated user.
 	AuthRequestHeaderName = "X-Kopano-UserEntryID"
+	// UsernameRequestHeaderName defines the request header which holds the
+	// username of the authenticated user.
+	UsernameRequestHeaderName = "X-Kopano-Username"
 )
 
 // HealthCheckHandler a http handler return 200 OK when server health is fine.
@@ -84,9 +87,18 @@ func (s *Server) AccessTokenRequired(next http.Handler) http.Handler {
 
 		if err == nil && authenticatedUserID != "" {
 			req.Header.Set(AuthRequestHeaderName, authenticatedUserID)
+			if claims != nil {
+				kcIDUsername := getKCIDUsernameFromClaims(claims)
+				if kcIDUsername != "" {
+					req.Header.Set(UsernameRequestHeaderName, kcIDUsername)
+				} else {
+					err = errors.New("missing kc.identity with username")
+				}
+			}
 			req = req.WithContext(auth.ContextWithAuthenticatedUserID(req.Context(), authenticatedUserID))
 		} else {
 			req.Header.Del(AuthRequestHeaderName)
+			req.Header.Del(UsernameRequestHeaderName)
 		}
 
 		if err != nil {
