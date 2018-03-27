@@ -1,0 +1,6 @@
+# Source me :)
+
+export ISS=https://your-issuer:8443
+export CLIENT_ID=playground.js
+export REFRESH_TOKEN_VALUE=
+
