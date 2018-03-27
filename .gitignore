@@ -11,3 +11,4 @@ __pycache__
 /govet.txt
 /3rdparty-LICENSES.md
 /examples/pubsjs
+/test/test-env
