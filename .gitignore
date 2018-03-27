@@ -12,3 +12,4 @@ __pycache__
 /3rdparty-LICENSES.md
 /examples/pubsjs
 /test/test-env
+/examples/dist
