@@ -30,7 +30,7 @@ window.app = new Vue({
 		clientID: '',
 		prompt: null,
 
-		apiPrefix: '/api/gc/v0',
+		apiPrefix: '/api/gc/v1',
 		pubsPrefix: '/api/pubs/v1',
 
 		requestTab: '',

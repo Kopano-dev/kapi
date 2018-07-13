@@ -137,11 +137,21 @@ func (p *KopanoGroupwareCorePlugin) ServeHTTP(rw http.ResponseWriter, req *http.
 
 	// Find handler.
 	switch path := req.URL.Path; {
+	case strings.HasPrefix(path, "/api/gc/v1/subscriptions"):
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleSubscriptionsV1))
+
 	case strings.HasPrefix(path, "/api/gc/v0/subscriptions"):
-		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleSubscriptionsV0))
+		// Backwards compatibility - rewrite URL to v1.
+		req.URL.Path = strings.Replace(req.URL.Path, "/api/gc/v0/", "/api/gc/v1/", 1)
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleSubscriptionsV1))
+
+	case strings.HasPrefix(path, "/api/gc/v1/"):
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleDefaultV1))
 
 	case strings.HasPrefix(path, "/api/gc/v0/"):
-		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleDefaultV0))
+		// Backwards compatibility - rewrite URL to v1.
+		req.URL.Path = strings.Replace(req.URL.Path, "/api/gc/v0/", "/api/gc/v1/", 1)
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleDefaultV1))
 	}
 
 	if handler == nil {
