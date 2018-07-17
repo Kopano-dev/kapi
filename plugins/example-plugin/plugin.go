@@ -68,7 +68,7 @@ func (p *ExamplePlugin) ServeHTTP(rw http.ResponseWriter, req *http.Request) (bo
 	case path == "/example-plugin/test":
 		p.testHandler(rw, req)
 	case path == "/example-plugin/auth-required/test":
-		p.srv.AccessTokenRequired(http.HandlerFunc(p.testHandler)).ServeHTTP(rw, req)
+		p.srv.AccessTokenRequired(http.HandlerFunc(p.testHandler), nil).ServeHTTP(rw, req)
 	case path == "/example-plugin/fake-error":
 		return false, errors.New("fake error")
 	default:

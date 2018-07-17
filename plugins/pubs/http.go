@@ -40,9 +40,9 @@ func (p *PubsPlugin) addRoutes(ctx context.Context, router *mux.Router) http.Han
 	v1.Handle("/webhook/{id}/{token}", p.MakeHTTPWebhookPublishHandler(v1)).
 		Methods(http.MethodPost).
 		Name(webhookRouterIdentifier)
-	v1.Handle("/webhook", p.srv.AccessTokenRequired(p.MakeHTTPWebhookRegisterHandler(v1))).
+	v1.Handle("/webhook", p.srv.AccessTokenRequired(p.MakeHTTPWebhookRegisterHandler(v1), scopesRequired)).
 		Methods(http.MethodPost)
-	v1.Handle("/stream/connect", p.srv.AccessTokenRequired(p.MakeHTTPWebsocketConnectHandler(v1)))
+	v1.Handle("/stream/connect", p.srv.AccessTokenRequired(p.MakeHTTPWebsocketConnectHandler(v1), scopesRequired))
 	v1.HandleFunc("/stream/websocket/{key}", p.HTTPWebsocketHandler).
 		Methods(http.MethodGet).
 		Name(websocketRouteIdentifier)

@@ -39,6 +39,8 @@ var pluginInfo = &plugins.InfoV1{
 	BuildDate: version.BuildDate,
 }
 
+var scopesRequired = []string{"profile", "email", "kopano/gc"}
+
 // KopanoGroupwareCorePlugin implements the Kopano Groupware Core API within
 // Kopano API.
 type KopanoGroupwareCorePlugin struct {
@@ -84,6 +86,12 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 		p.srv.Logger().Warnln("groupware-core: CORS support enabled")
 		p.cors = cors.AllowAll()
 	}
+
+	scopesRequiredString := os.Getenv("KOPANO_GC_REQUIRED_SCOPES")
+	if scopesRequiredString != "" {
+		scopesRequired = strings.Split(scopesRequiredString, " ")
+	}
+	p.srv.Logger().WithField("required_scopes", scopesRequired).Infoln("groupware-core: access requirements set up")
 
 	// Start looking for rest sockets asynchronously to allow them to start later.
 	go func() {
@@ -138,20 +146,20 @@ func (p *KopanoGroupwareCorePlugin) ServeHTTP(rw http.ResponseWriter, req *http.
 	// Find handler.
 	switch path := req.URL.Path; {
 	case strings.HasPrefix(path, "/api/gc/v1/subscriptions"):
-		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleSubscriptionsV1))
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleSubscriptionsV1), scopesRequired)
 
 	case strings.HasPrefix(path, "/api/gc/v0/subscriptions"):
 		// Backwards compatibility - rewrite URL to v1.
 		req.URL.Path = strings.Replace(req.URL.Path, "/api/gc/v0/", "/api/gc/v1/", 1)
-		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleSubscriptionsV1))
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleSubscriptionsV1), nil)
 
 	case strings.HasPrefix(path, "/api/gc/v1/"):
-		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleDefaultV1))
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleDefaultV1), scopesRequired)
 
 	case strings.HasPrefix(path, "/api/gc/v0/"):
 		// Backwards compatibility - rewrite URL to v1.
 		req.URL.Path = strings.Replace(req.URL.Path, "/api/gc/v0/", "/api/gc/v1/", 1)
-		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleDefaultV1))
+		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleDefaultV1), nil)
 	}
 
 	if handler == nil {

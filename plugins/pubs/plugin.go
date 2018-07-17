@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"encoding/hex"
@@ -51,6 +52,8 @@ var pluginInfo = &plugins.InfoV1{
 	Version:   version.Version,
 	BuildDate: version.BuildDate,
 }
+
+var scopesRequired = []string{"kopano/gc"}
 
 // PubsPlugin implements a flexible Webhook system providing a RESTful API
 // to register hooks and a Websocket API for efficient receival.
@@ -108,6 +111,12 @@ func (p *PubsPlugin) Initialize(ctx context.Context, errCh chan<- error, srv plu
 	if len(hashKey) < 32 {
 		return fmt.Errorf("pubs: secret key too small, at least 32 bytes are required")
 	}
+
+	scopesRequiredString := os.Getenv("KOPANO_PUBS_REQUIRED_SCOPES")
+	if scopesRequiredString != "" {
+		scopesRequired = strings.Split(scopesRequiredString, " ")
+	}
+	p.srv.Logger().WithField("required_scopes", scopesRequired).Infoln("pubs: access requirements set up")
 
 	p.pubsub = pubsub.New(256) //TODO(longsleep): Add capacity to configuration.
 	p.broadcast = rndm.GenerateRandomString(32)

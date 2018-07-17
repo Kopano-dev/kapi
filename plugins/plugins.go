@@ -44,6 +44,6 @@ type PluginV1 interface {
 type ServerV1 interface {
 	Logger() logrus.FieldLogger
 
-	AccessTokenRequired(next http.Handler) http.Handler
+	AccessTokenRequired(next http.Handler, scopesRequired []string) http.Handler
 	HandleWithProxy(proxy proxy.HTTPProxyHandler, next http.Handler) http.Handler
 }

@@ -25,6 +25,7 @@ import (
 const (
 	IdentityClaim           = "kc.identity"
 	IdentifiedUsernameClaim = "kc.i.un"
+	AuthorizedScopesClaim   = "kc.authorizedScopes"
 )
 
 func getKCIDUsernameFromClaims(claims *kcoidc.ExtraClaimsWithType) string {
@@ -34,4 +35,17 @@ func getKCIDUsernameFromClaims(claims *kcoidc.ExtraClaimsWithType) string {
 	}
 
 	return ""
+}
+
+func getKCAuthorizedScopesFromClaims(claims *kcoidc.ExtraClaimsWithType) map[string]bool {
+	if authorizedScopes, _ := (*claims)[AuthorizedScopesClaim].([]interface{}); authorizedScopes != nil {
+		authorizedScopesMap := make(map[string]bool)
+		for _, scope := range authorizedScopes {
+			authorizedScopesMap[scope.(string)] = true
+		}
+
+		return authorizedScopesMap
+	}
+
+	return nil
 }
