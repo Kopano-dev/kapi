@@ -40,6 +40,7 @@ var pluginInfo = &plugins.InfoV1{
 }
 
 var scopesRequired = []string{"profile", "email", "kopano/gc"}
+var apiV0Enabled = false
 
 // KopanoGroupwareCorePlugin implements the Kopano Groupware Core API within
 // Kopano API.
@@ -92,6 +93,11 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 		scopesRequired = strings.Split(scopesRequiredString, " ")
 	}
 	p.srv.Logger().WithField("required_scopes", scopesRequired).Infoln("groupware-core: access requirements set up")
+
+	if os.Getenv("KOPANO_GC_ENABLE_API_V0") == "1" {
+		apiV0Enabled = true
+		p.srv.Logger().Warnln("groupware-core: obsolete insecure API v0 endpoints enabled")
+	}
 
 	// Start looking for rest sockets asynchronously to allow them to start later.
 	go func() {
@@ -148,7 +154,7 @@ func (p *KopanoGroupwareCorePlugin) ServeHTTP(rw http.ResponseWriter, req *http.
 	case strings.HasPrefix(path, "/api/gc/v1/subscriptions"):
 		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleSubscriptionsV1), scopesRequired)
 
-	case strings.HasPrefix(path, "/api/gc/v0/subscriptions"):
+	case apiV0Enabled && strings.HasPrefix(path, "/api/gc/v0/subscriptions"):
 		// Backwards compatibility - rewrite URL to v1.
 		req.URL.Path = strings.Replace(req.URL.Path, "/api/gc/v0/", "/api/gc/v1/", 1)
 		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleSubscriptionsV1), nil)
@@ -156,7 +162,7 @@ func (p *KopanoGroupwareCorePlugin) ServeHTTP(rw http.ResponseWriter, req *http.
 	case strings.HasPrefix(path, "/api/gc/v1/"):
 		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleDefaultV1), scopesRequired)
 
-	case strings.HasPrefix(path, "/api/gc/v0/"):
+	case apiV0Enabled && strings.HasPrefix(path, "/api/gc/v0/"):
 		// Backwards compatibility - rewrite URL to v1.
 		req.URL.Path = strings.Replace(req.URL.Path, "/api/gc/v0/", "/api/gc/v1/", 1)
 		handler = p.srv.AccessTokenRequired(http.HandlerFunc(p.handleDefaultV1), nil)
