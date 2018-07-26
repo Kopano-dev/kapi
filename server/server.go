@@ -20,6 +20,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -59,7 +60,7 @@ func NewServer(listenAddr string, pluginsPath string, iss *url.URL, enabledPlugi
 		client = http.DefaultClient
 	}
 
-	provider, err := kcoidc.NewProvider(client, nil, false)
+	provider, err := kcoidc.NewProvider(client, log.New(os.Stderr, "kcoidc: ", log.LstdFlags), os.Getenv("KCOIDC_DEBUG") == "1")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create kcoidc provider for server: %v", err)
 	}
