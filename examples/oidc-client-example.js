@@ -37,9 +37,11 @@ window.app = new Vue({
 		requestKey: null,
 		requestEndpoint: '',
 		requestResponse: '',
+		requestResponseJSON: undefined,
 		requestResponseEditor: null,
 		requestResponseHeaders: null,
 		requestNextLink: null,
+		bodyEditor: null,
 
 		requestMode: {
 			default: true
@@ -88,11 +90,22 @@ window.app = new Vue({
 		this.prompt = '';
 
 		this.$nextTick(() => {
+			// Code editor.
 			this.requestResponseEditor = ace.edit(this.$refs.requestResponseEditor);
 			this.requestResponseEditor.getSession().setMode("ace/mode/json");
 			this.requestResponseEditor.setReadOnly(true);
 			this.requestResponseEditor.setShowPrintMargin(false);
 			this.requestResponseEditor.$blockScrolling = Infinity;
+			// HTML Editor.
+			this.bodyEditor = new Quill(this.$refs.bodyEditor, {
+				debug: 'info',
+				modules: {
+					toolbar: true,
+					clipboard: true,
+				},
+				theme: 'snow'
+			});
+			this.bodyEditor.disable();
 		});
 
 		setInterval(() => {
@@ -180,7 +193,36 @@ window.app = new Vue({
 				this.requestResponseEditor.setValue('');
 			}
 			this.requestResponseEditor.clearSelection();
-		}
+		},
+		requestResponseJSON: function(val) {
+			if (val && val.body !== undefined) {
+				let content = val.body.content;
+				switch (val.body.contentType) {
+					case 'text':
+						const reader = new commonmark.Parser();
+						const writer = new commonmark.HtmlRenderer({
+							safe: true,
+							smart: true,
+							softbreak: '<br/>',
+						});
+						const parsed = reader.parse(content);
+					 	content = writer.render(parsed);
+						break;
+
+					case 'html':
+						// Yeah .. :/
+						break;
+				}
+
+				const clean = DOMPurify.sanitize(content);
+				this.bodyEditor.clipboard.dangerouslyPasteHTML(clean, 'api');
+				this.bodyEditor.enable();
+			} else {
+				this.bodyEditor.disable();
+				this.bodyEditor.clipboard.dangerouslyPasteHTML('', 'api');
+
+			}
+		},
 	},
 	computed: {
 		requestResponseHeadersFormatted: function() {
@@ -356,14 +398,19 @@ window.app = new Vue({
 
 				this.requestResponse = response.bodyText;
 				if (response.headers.get('content-type').indexOf('application/json') === 0) {
-					return response.json();
+					return response.json().then(data => {
+						this.requestResponseJSON = data;
+						return data;
+					});
 				} else {
+					this.requestResponseJSON = undefined;
 					return response.text();
 				}
 			}).catch(response => {
 				response.text().then(t => {
 					this.requestResponse = t;
 				});
+				this.requestResponseJSON = undefined;
 				this.requestResponseHeaders = response.headers.map;
 				this.requestStatus = {
 					success: false,
