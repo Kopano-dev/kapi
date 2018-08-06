@@ -197,6 +197,8 @@ window.app = new Vue({
 		requestResponseJSON: function(val) {
 			if (val && val.body !== undefined) {
 				let content = val.body.content;
+				console.debug(`raw body (${val.body.contentType})`, content);
+
 				switch (val.body.contentType) {
 					case 'text':
 						const reader = new commonmark.Parser();
@@ -207,6 +209,8 @@ window.app = new Vue({
 						});
 						const parsed = reader.parse(content);
 					 	content = writer.render(parsed);
+
+						console.debug('converted body', content);
 						break;
 
 					case 'html':
@@ -214,7 +218,13 @@ window.app = new Vue({
 						break;
 				}
 
-				const clean = DOMPurify.sanitize(content);
+				const clean = DOMPurify.sanitize(content, {
+					FORBID_TAGS:    ['svg'],
+					WHOLE_DOCUMENT: false,
+				});
+
+				console.debug('clean body', clean);
+
 				this.bodyEditor.clipboard.dangerouslyPasteHTML(clean, 'api');
 				this.bodyEditor.enable();
 			} else {

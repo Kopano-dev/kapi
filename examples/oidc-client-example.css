@@ -17,9 +17,11 @@
 
 .response {
 	font-size: .8em;
-	height: 400px;
+	min-height: 400px;
 	position: relative;
 	border: 1px solid #ddd;
+	display: flex;
+	flex-direction: column;
 }
 .response > pre {
 	position: absolute;
@@ -27,4 +29,13 @@
 	right: 0;
 	top: 0;
 	bottom: 0;
+}
+
+.response .ql-container {
+	flex: 1;
+	overflow: auto;
+	max-height: 360px;
+}
+.response .ql-editor {
+	height: auto;
 }
