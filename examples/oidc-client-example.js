@@ -49,7 +49,7 @@ window.app = new Vue({
 		requestStatus: null,
 		requestResults: {},
 		requestResult: null,
-		requestContext: '',
+		requestContext: 'me/calendar/events',
 
 		responseTab: '',
 		responseMode: {
