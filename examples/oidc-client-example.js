@@ -641,7 +641,7 @@ window.app = new Vue({
 
 			const resource = this.requestContext;
 
-			const changeType = "created,updated";
+			const changeType = "created,updated,deleted";
 			const expirationDateTime = new Date();
 			const payload = {
 				"changeType": changeType,
