@@ -79,7 +79,10 @@ func NewServer(listenAddr string, pluginsPath string, iss *url.URL, enabledPlugi
 		allowAuthPassthrough: os.Getenv("KOPANO_ALLOW_AUTH_PASSTHROUGH") == "1",
 	}
 
-	s.loadPlugins()
+	err = s.loadPlugins()
+	if err != nil {
+		return s, err
+	}
 
 	return s, nil
 }
