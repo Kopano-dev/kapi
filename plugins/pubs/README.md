@@ -8,8 +8,8 @@ stream subscription.
 For security, the pubs plugin needs a secret key so it can HMAC its tokens. By
 default a random 512 bit secret key is generated on startup. For production use
 the key should not change and can be provided as hex encoded value by the
-`KOPANO_PUBS_SECRET_KEY` environment variable. A suitable key value can be created
-with with `openssl rand -hex 64`.
+`KOPANO_PUBS_SECRET_KEY` environment variable. A suitable key value can be
+created with with `openssl rand -hex 64`.
 
 ## HTTP API v1
 

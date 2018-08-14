@@ -38,7 +38,7 @@ It takes a comma seperated value of plugin IDs as the plugin defined it during
 its build time. If the `--plugins` parameter is empty (the default), all plugins
 found will be activated.
 
-The `--iss` parameter points to an OpenID Connect issuer with support for 
+The `--iss` parameter points to an OpenID Connect issuer with support for
 discovery (Kopano Konnect). On start, the service will try discover OIDC details
 and allow Bearer authentication with access tokens once successful. The `--iss`
 parameter is mandatory.
@@ -55,8 +55,9 @@ access to Kopano Groupware Core RESTful API via `/api/gc/` URL routing prefix.
 
 To specify where the Groupware Core plugin can find its required backend sockets
 specify the `KOPANO_GC_REST_SOCKETS` environment variable to point to the base
-directory location. All `.sock` files in that directory will be used as upstream
-proxy paths.
+directory location. All `rest*.sock` files in that directory will be used as
+upstream proxy paths for the REST api and all `notify*.sock` files in that
+directory will be used as upstream proxy paths for the subscription socket API.
 
 ### pubs: Kopano Pubsub and Webhook plugin
 
