@@ -1,0 +1,91 @@
+#!/bin/sh
+#
+# Kopano API Daemon (kapid) launcher
+#
+# License: AGPL-3.0-only
+# Copyright 2018 Kopano and its licensors
+#
+
+set -e
+
+# Base defines.
+
+EXE=/usr/libexec/kopano/kapid
+DEFAULT_PLUGINS_PATH=/usr/lib/kopano/kapi-plugins
+DEFAULT_OIDC_ISSUER_IDENTIFIER=https://localhost
+
+# Handle parameters for configuration.
+
+case "${1}" in
+	serve)
+		# Inject values from environment into command line. This is mainly used
+		# when this script is run from systemd or docker.
+
+		# kapid basics
+
+		if [ -z "$plugins_path" ]; then
+			plugins_path=$DEFAULT_PLUGINS_PATH
+		fi
+
+		if [ -n "$oidc_issuer_identifier" ]; then
+			if [ -n "$OIDC_ISSUER_IDENTIFIER" ]; then
+				>&2	echo "Warning: duplicate setting of issuer identifier - using value from environment"
+				oidc_issuer_identifier="$OIDC_ISSUER_IDENTIFIER"
+			fi
+		fi
+		if [ -z "$oidc_issuer_identifier" ]; then
+			# NOTE(longsleep): Not sure if this is the best idea/default but at least
+			# having a default will let the service start.
+			oidc_issuer_identifier=${OIDC_ISSUER_IDENTIFIER:-${DEFAULT_OIDC_ISSUER_IDENTIFIER}}
+		fi
+
+		if [ "$insecure" = "yes" ]; then
+			set -- "$@" --insecure
+		fi
+
+		if [ -n "$plugins" ]; then
+			set -- "$@" --plugins="$plugins"
+		fi
+
+		if [ -n "$listen" ]; then
+			set -- "$@" --listen="$listen"
+		fi
+
+		set -- "$@" --plugins-path="$plugins_path" --iss="$oidc_issuer_identifier"
+
+		# groupware-core plugin
+
+		KOPANO_GC_REST_SOCKETS=${KOPANO_GC_REST_SOCKETS:-/var/run/kopano-gc-rest}
+		if [ -n "$plugin_gc_rest_socket_path" ]; then
+			KOPANO_GC_REST_SOCKETS=$plugin_gc_rest_socket_path
+		fi
+		export KOPANO_GC_REST_SOCKETS
+
+		# pubs plugin
+
+		if [ -z "$plugin_pubs_secret_key" -a -f /etc/kopano/kapid-pubs-secret.key ]; then
+			# Fallback to default when not set but default location exists.
+			plugin_pubs_secret_key=/etc/kopano/kapid-pubs-secret.key
+		fi
+		if [ -n "$plugin_pubs_secret_key" ]; then
+			if [ ! -f "$plugin_pubs_secret_key" ]; then
+				>&2 echo "Error: $plugin_pubs_secret_key: plugin_pubs_secret_key value invalid, not found or is not a file"
+				exit 1
+			fi
+			KOPANO_PUBS_SECRET_KEY=$(cat "$plugin_pubs_secret_key")
+		fi
+		export KOPANO_PUBS_SECRET_KEY
+
+		;;
+
+	*)
+		;;
+esac
+
+# Set executable.
+
+set -- ${EXE} "$@"
+
+# Run.
+
+exec "$@"

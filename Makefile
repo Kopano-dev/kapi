@@ -123,13 +123,18 @@ licenses: ; $(info building licenses files ...)
 
 .PHONY: dist
 dist: 3rdparty-LICENSES.md ; $(info building dist tarball ...)
+	@rm -rf "dist/${PACKAGE_NAME}-${VERSION}"
 	@mkdir -p "dist/${PACKAGE_NAME}-${VERSION}"
+	@mkdir -p "dist/${PACKAGE_NAME}-${VERSION}/scripts"
 	@cd dist && \
 	cp -avf ../LICENSE.txt "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../README.md "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../3rdparty-LICENSES.md "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../bin/* "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../bin/plugins "${PACKAGE_NAME}-${VERSION}" && \
+	cp -avf ../scripts/kopano-kapid.binscript "${PACKAGE_NAME}-${VERSION}/scripts" && \
+	cp -avf ../scripts/kopano-kapid.service "${PACKAGE_NAME}-${VERSION}/scripts" && \
+	cp -avf ../scripts/kapid.cfg "${PACKAGE_NAME}-${VERSION}/scripts" && \
 	tar --owner=0 --group=0 -czvf ${PACKAGE_NAME}-${VERSION}.tar.gz "${PACKAGE_NAME}-${VERSION}" && \
 	cd ..
 
