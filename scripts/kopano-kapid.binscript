@@ -51,6 +51,10 @@ case "${1}" in
 			set -- "$@" --listen="$listen"
 		fi
 
+		if [ -n "$log_level" ]; then
+			set -- "$@" --log-level="$log_level"
+		fi
+
 		set -- "$@" --plugins-path="$plugins_path" --iss="$oidc_issuer_identifier"
 
 		# groupware-core plugin
