@@ -29,7 +29,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"stash.kopano.io/kc/kapi/cmd"
@@ -61,18 +60,22 @@ func commandServe() *cobra.Command {
 	serveCmd.Flags().String("plugins", "", "Enabled plugin IDs. When empty, all found plugins are enabled. Seperate multiple IDs with comma.")
 	serveCmd.Flags().String("iss", "", "OIDC issuer URL")
 	serveCmd.Flags().Bool("insecure", false, "Disable TLS certificate and hostname validation")
+	serveCmd.Flags().Bool("log-timestamp", true, "Prefix each log line with timestamp")
+	serveCmd.Flags().String("log-level", "info", "Log level (one of panic, fatal, error, warn, info or debug)")
 
 	return serveCmd
 }
 
 func serve(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	logger := &logrus.Logger{
-		Out:       os.Stderr,
-		Formatter: &logrus.TextFormatter{},
-		Level:     logrus.DebugLevel,
-	}
 
+	logTimestamp, _ := cmd.Flags().GetBool("log-timestamp")
+	logLevel, _ := cmd.Flags().GetString("log-level")
+
+	logger, err := newLogger(!logTimestamp, logLevel)
+	if err != nil {
+		return fmt.Errorf("failed to create logger: %v", err)
+	}
 	logger.Infoln("serve start")
 
 	var pluginsPath string
