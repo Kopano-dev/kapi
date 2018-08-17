@@ -80,7 +80,7 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 	}
 
 	if fp, err := os.Stat(socketPath); err != nil || !fp.IsDir() {
-		return fmt.Errorf("KOPANO_GC_REST_SOCKETS does not exist or is not a directory: %v", err)
+		p.srv.Logger().Warnf("KOPANO_GC_REST_SOCKETS does not exist or is not a directory: %v", err)
 	}
 
 	if os.Getenv("KOPANO_GC_REST_ALLOW_CORS") == "1" {

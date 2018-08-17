@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -44,8 +45,14 @@ func (p *KopanoGroupwareCorePlugin) initializeProxy(ctx context.Context, socketP
 
 	var err error
 	var init bool
+	var count int
 	for {
 		for {
+			if fp, statErr := os.Stat(socketPath); statErr != nil || !fp.IsDir() {
+				err = statErr
+				break
+			}
+
 			socketPaths, globErr := filepath.Glob(fmt.Sprintf("%s/%s", socketPath, pattern))
 			if globErr != nil {
 				err = globErr
@@ -72,8 +79,12 @@ func (p *KopanoGroupwareCorePlugin) initializeProxy(ctx context.Context, socketP
 			return pr, nil
 		}
 
-		if err != nil {
+		if err != nil && count == 5 {
 			p.srv.Logger().WithError(err).Warnf("groupware-core: waiting for proxy %s files to appear", pattern)
+		}
+		count++
+		if count > 60 {
+			count = 0
 		}
 
 		select {
