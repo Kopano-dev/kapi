@@ -34,7 +34,7 @@ import (
 )
 
 var pluginInfo = &plugins.InfoV1{
-	ID:        "groupware-core",
+	ID:        "grapi",
 	Version:   version.Version,
 	BuildDate: version.BuildDate,
 }
@@ -67,36 +67,36 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 	p.ctx = ctx
 	p.srv = srv
 
-	srv.Logger().Debugln("groupware-core: initialize")
+	srv.Logger().Debugln("grapi: initialize")
 
-	socketPath := os.Getenv("KOPANO_GC_REST_SOCKETS")
+	socketPath := os.Getenv("KOPANO_GRAPI_SOCKETS")
 	if socketPath == "" {
-		return fmt.Errorf("KOPANO_GC_REST_SOCKETS environment variable is not set but required")
+		return fmt.Errorf("KOPANO_GRAPI_SOCKETS environment variable is not set but required")
 	}
 
 	socketPath, err := filepath.Abs(socketPath)
 	if err != nil {
-		return fmt.Errorf("KOPANO_GC_REST_SOCKETS value is invalid: %v", err)
+		return fmt.Errorf("KOPANO_GRAPI_SOCKETS value is invalid: %v", err)
 	}
 
 	if fp, err := os.Stat(socketPath); err != nil || !fp.IsDir() {
-		p.srv.Logger().Warnf("KOPANO_GC_REST_SOCKETS does not exist or is not a directory: %v", err)
+		p.srv.Logger().Warnf("KOPANO_GRAPI_SOCKETS does not exist or is not a directory: %v", err)
 	}
 
-	if os.Getenv("KOPANO_GC_REST_ALLOW_CORS") == "1" {
-		p.srv.Logger().Warnln("groupware-core: CORS support enabled")
+	if os.Getenv("KOPANO_GRAPI_ALLOW_CORS") == "1" {
+		p.srv.Logger().Warnln("grapi: CORS support enabled")
 		p.cors = cors.AllowAll()
 	}
 
-	scopesRequiredString := os.Getenv("KOPANO_GC_REQUIRED_SCOPES")
+	scopesRequiredString := os.Getenv("KOPANO_GRAPI_REQUIRED_SCOPES")
 	if scopesRequiredString != "" {
 		scopesRequired = strings.Split(scopesRequiredString, " ")
 	}
-	p.srv.Logger().WithField("required_scopes", scopesRequired).Infoln("groupware-core: access requirements set up")
+	p.srv.Logger().WithField("required_scopes", scopesRequired).Infoln("grapi: access requirements set up")
 
-	if os.Getenv("KOPANO_GC_ENABLE_API_V0") == "1" {
+	if os.Getenv("KOPANO_GRAPI_ENABLE_API_V0") == "1" {
 		apiV0Enabled = true
-		p.srv.Logger().Warnln("groupware-core: obsolete insecure API v0 endpoints enabled")
+		p.srv.Logger().Warnln("grapi: obsolete insecure API v0 endpoints enabled")
 	}
 
 	// Start looking for rest sockets asynchronously to allow them to start later.
@@ -113,7 +113,7 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 		p.mutex.Lock()
 		p.defaultProxy = pr
 		p.mutex.Unlock()
-		p.srv.Logger().Debugf("groupware-core: enabled default api proxy")
+		p.srv.Logger().Debugf("grapi: enabled default api proxy")
 	}()
 
 	// Start looking for subscriptions ockets asynchronously to allow them to start later.
@@ -130,7 +130,7 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 		p.mutex.Lock()
 		p.subscriptionProxy = pr
 		p.mutex.Unlock()
-		p.srv.Logger().Debugf("groupware-core: enabled subscription proxy")
+		p.srv.Logger().Debugf("grapi: enabled subscription proxy")
 	}()
 
 	return nil
@@ -138,7 +138,7 @@ func (p *KopanoGroupwareCorePlugin) Initialize(ctx context.Context, errCh chan<-
 
 // Close closes the accociated plugin.
 func (p *KopanoGroupwareCorePlugin) Close() error {
-	p.srv.Logger().Debugln("groupware-core: close")
+	p.srv.Logger().Debugln("grapi: close")
 
 	close(p.exitCh)
 

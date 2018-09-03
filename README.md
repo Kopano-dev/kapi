@@ -22,10 +22,10 @@ make
 ## Running Kopano API
 
 ```
-KOPANO_GC_REST_SOCKETS=/run/kopano/fleet-runner ./bin/kapid serve \
+KOPANO_GRAPI_SOCKETS=/run/kopano-grapi ./bin/kapid serve \
   --listen 127.0.0.1:8039 \
   --plugins-path=./plugins \
-  --plugins=groupware-core \
+  --plugins=grapi \
   --iss=https://mykonnect.local
 ```
 
@@ -48,16 +48,16 @@ parameter is mandatory.
 Kopano API supports plugins. Plugins can be used to extend HTTP routes served
 by Kopano API. A example plugin can be found in `plugins/example-plugin`.
 
-### groupware-core: Kopano Groupware Core plugin
+### grapi: Kopano Groupware REST plugin
 
-Kopano API includes the plugin for Kopano Groupware Core. This plugin provides
-access to Kopano Groupware Core RESTful API via `/api/gc/` URL routing prefix.
+Kopano API includes the plugin for Kopano Groupware REST. This plugin provides
+access to Kopano Groupware RESTful API via `/api/gc/` URL routing prefix.
 
-To specify where the Groupware Core plugin can find its required backend sockets
-specify the `KOPANO_GC_REST_SOCKETS` environment variable to point to the base
-directory location. All `rest*.sock` files in that directory will be used as
-upstream proxy paths for the REST api and all `notify*.sock` files in that
-directory will be used as upstream proxy paths for the subscription socket API.
+To specify where the Grapi plugin can find its required backend sockets, specify
+the `KOPANO_GRAPI_SOCKETS` environment variable to point to the base directory
+location. All `rest*.sock` files in that directory will be used as upstream
+proxy paths for the REST api and all `notify*.sock` files in that directory will
+be used as upstream proxy paths for the subscription socket API.
 
 ### pubs: Kopano Pubsub and Webhook plugin
 

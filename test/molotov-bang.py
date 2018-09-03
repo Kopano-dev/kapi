@@ -10,7 +10,7 @@ import os
 from molotov import scenario, setup, global_setup, global_teardown, teardown, set_var, get_var, json_request
 
 
-_API = os.environ.get('KOPANO_APID_URL', 'http://127.0.0.1:8039')
+_API = os.environ.get('KAPID_URL', 'http://127.0.0.1:8039')
 _GCAPI = '%s/api/gc/v0' % _API
 _HEADERS = {
     'X-Request-With-Molotov': '1'

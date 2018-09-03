@@ -41,7 +41,7 @@ var restProxyConfiguration = &httpproxy.Configuration{
 }
 
 func (p *KopanoGroupwareCorePlugin) initializeProxy(ctx context.Context, socketPath string, pattern string) (proxy.HTTPProxyHandler, error) {
-	p.srv.Logger().Debugf("groupware-core: looking for proxy %s files in %s", pattern, socketPath)
+	p.srv.Logger().Debugf("grapi: looking for proxy %s files in %s", pattern, socketPath)
 
 	var err error
 	var init bool
@@ -70,17 +70,17 @@ func (p *KopanoGroupwareCorePlugin) initializeProxy(ctx context.Context, socketP
 				break
 			}
 
-			pr, proxyErr := httpproxy.New("groupware-core", socketPaths, restProxyConfiguration)
+			pr, proxyErr := httpproxy.New("grapi", socketPaths, restProxyConfiguration)
 			if proxyErr != nil {
 				return nil, proxyErr
 			}
 
-			p.srv.Logger().Debugf("groupware-core: found %d %s upstream proxy workers", len(socketPaths), pattern)
+			p.srv.Logger().Debugf("grapi: found %d %s upstream proxy workers", len(socketPaths), pattern)
 			return pr, nil
 		}
 
 		if err != nil && count == 5 {
-			p.srv.Logger().WithError(err).Warnf("groupware-core: waiting for proxy %s files to appear", pattern)
+			p.srv.Logger().WithError(err).Warnf("grapi: waiting for proxy %s files to appear", pattern)
 		}
 		count++
 		if count > 60 {
@@ -119,6 +119,6 @@ func (p *KopanoGroupwareCorePlugin) handleSubscriptionsV1(rw http.ResponseWriter
 func (p *KopanoGroupwareCorePlugin) handleNoProxy(rw http.ResponseWriter, req *http.Request) {
 	// NOTE(longsleep): This handler is only reached when no proxy is available.
 
-	p.srv.Logger().WithError(errors.New("proxy not configured")).Errorln("groupware-core: proxy request not possible")
+	p.srv.Logger().WithError(errors.New("proxy not configured")).Errorln("grapi: proxy request not possible")
 	http.Error(rw, "", http.StatusBadGateway)
 }
