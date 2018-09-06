@@ -1,5 +1,5 @@
-hash: c8c92b857eec7fac0339e2fb17816d6268c991322c11788b85c36a56155057c0
-updated: 2018-09-06T16:30:51.192915385+02:00
+hash: a59252bdf6a38ad23c02bde8bf587164f2d5eff9c85c81be03bf6fc17e021759
+updated: 2018-09-06T19:10:03.596214182+02:00
 imports:
 - name: github.com/aead/chacha20
   version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
@@ -143,7 +143,7 @@ imports:
   - cipher
   - json
 - name: stash.kopano.io/kc/libkcoidc
-  version: 36b058db0a101c3d30829ca68877d6fa06b4ce56
+  version: 169129732bc2528c67c1f4431b14abb8081964bc
 - name: stash.kopano.io/kgol/rndm
   version: 69ff9c69d5ce12d2fb19a552eab58ad657a5e8b2
 - name: stash.kopano.io/kwm/kwmserver
