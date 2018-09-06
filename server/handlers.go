@@ -19,7 +19,6 @@ package server
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -37,7 +36,7 @@ func (s *Server) HealthCheckHandler(rw http.ResponseWriter, req *http.Request) {
 
 // AccessTokenRequired parses incoming bearer authentication and injects the
 // subject of the token into the request as header.
-func (s *Server) AccessTokenRequired(next http.Handler, scopesRequired []string) http.Handler {
+func (s *Server) AccessTokenRequired(next http.Handler, requiredScopes []string) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		var err error
 
@@ -69,21 +68,9 @@ func (s *Server) AccessTokenRequired(next http.Handler, scopesRequired []string)
 			}
 		}
 
-		if err == nil && len(scopesRequired) > 0 {
-			if extraClaims != nil {
-				authorizedScopes := auth.KCAuthorizedScopesFromClaims(extraClaims)
-				missingScopes := make([]string, 0)
-				for _, scope := range scopesRequired {
-					if ok, _ := authorizedScopes[scope]; !ok {
-						missingScopes = append(missingScopes, scope)
-					}
-				}
-				if len(missingScopes) > 0 {
-					err = fmt.Errorf("missing authorized scopes: %v", missingScopes)
-				}
-			} else {
-				err = errors.New("missing authorized scopes claim")
-			}
+		if err == nil && len(requiredScopes) > 0 {
+			// Check required scopes.
+			err = kcoidc.RequireScopesInClaims(extraClaims, requiredScopes)
 		}
 
 		if err == nil && authenticatedUserID != "" {
