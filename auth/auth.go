@@ -19,26 +19,48 @@ package auth
 
 import (
 	"context"
+
+	"github.com/dgrijalva/jwt-go"
+	kcoidc "stash.kopano.io/kc/libkcoidc"
 )
 
-type requestContextKey string
+type contextKey string
 
 const (
-	authenticatedUserIDrequestContextKey requestContextKey = "authenticatedUserID"
+	authRecordcontextKey contextKey = "authRecord"
 )
+
+// Record is the auth record holding the current authenticated details.
+type Record struct {
+	AuthenticatedUserID string
+
+	StandardClaims *jwt.StandardClaims
+	ExtraClaims    *kcoidc.ExtraClaimsWithType
+}
 
 // AuthenticatedUserIDFromContext returns the provided requests authentication
 // ID if present.
 func AuthenticatedUserIDFromContext(ctx context.Context) (string, bool) {
-	if v := ctx.Value(authenticatedUserIDrequestContextKey); v != nil {
-		return v.(string), true
+	if v := ctx.Value(authRecordcontextKey); v != nil {
+		record, _ := v.(Record)
+		return record.AuthenticatedUserID, true
 	}
 
 	return "", false
 }
 
-// ContextWithAuthenticatedUserID adds the provided authenticatedUSerID to the
-// provided parent context and returns a context holding the value.
-func ContextWithAuthenticatedUserID(parent context.Context, authenticatedUserID string) context.Context {
-	return context.WithValue(parent, authenticatedUserIDrequestContextKey, authenticatedUserID)
+// RecordFromContext returns the provided requests authentication
+// ID if present.
+func RecordFromContext(ctx context.Context) (*Record, bool) {
+	if v := ctx.Value(authRecordcontextKey); v != nil {
+		return v.(*Record), true
+	}
+
+	return nil, false
+}
+
+// ContextWithRecord adds the provided auth record to the provided parent
+// context and returns a context holding the value.
+func ContextWithRecord(parent context.Context, record *Record) context.Context {
+	return context.WithValue(parent, authRecordcontextKey, record)
 }

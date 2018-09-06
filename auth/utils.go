@@ -15,7 +15,7 @@
  *
  */
 
-package server
+package auth
 
 import (
 	kcoidc "stash.kopano.io/kc/libkcoidc"
@@ -24,20 +24,26 @@ import (
 // Token claims used by Kopano Konnect.
 const (
 	IdentityClaim           = "kc.identity"
+	IdentifiedUserIDClaim   = "kc.i.id"
 	IdentifiedUsernameClaim = "kc.i.un"
 	AuthorizedScopesClaim   = "kc.authorizedScopes"
 )
 
-func getKCIDUsernameFromClaims(claims *kcoidc.ExtraClaimsWithType) string {
+// KCIDFromClaims extracts extra Kopano Connect identified claims from the
+// provided extra claims.
+func KCIDFromClaims(claims *kcoidc.ExtraClaimsWithType) (string, string) {
 	if identityClaims, _ := (*claims)[IdentityClaim].(map[string]interface{}); identityClaims != nil {
+		kcIDUserID, _ := identityClaims[IdentifiedUserIDClaim].(string)
 		kcIDUsername, _ := identityClaims[IdentifiedUsernameClaim].(string)
-		return kcIDUsername
+		return kcIDUserID, kcIDUsername
 	}
 
-	return ""
+	return "", ""
 }
 
-func getKCAuthorizedScopesFromClaims(claims *kcoidc.ExtraClaimsWithType) map[string]bool {
+// KCAuthorizedScopesFromClaims authorize scopes as bool map from the provided
+// extra claims.
+func KCAuthorizedScopesFromClaims(claims *kcoidc.ExtraClaimsWithType) map[string]bool {
 	if authorizedScopes, _ := (*claims)[AuthorizedScopesClaim].([]interface{}); authorizedScopes != nil {
 		authorizedScopesMap := make(map[string]bool)
 		for _, scope := range authorizedScopes {

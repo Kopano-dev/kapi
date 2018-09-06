@@ -40,6 +40,11 @@ var restProxyConfiguration = &httpproxy.Configuration{
 	TryInterval: 50 * time.Millisecond,
 }
 
+const (
+	entryIDRequestHeaderName  = "X-Kopano-UserEntryID"
+	usernameRequestHeaderName = "X-Kopano-Username"
+)
+
 func (p *KopanoGroupwareCorePlugin) initializeProxy(ctx context.Context, socketPath string, pattern string) (proxy.HTTPProxyHandler, error) {
 	p.srv.Logger().Debugf("grapi: looking for proxy %s files in %s", pattern, socketPath)
 
@@ -103,6 +108,14 @@ func (p *KopanoGroupwareCorePlugin) handleDefaultV1(rw http.ResponseWriter, req 
 	proxy := p.defaultProxy
 	p.mutex.RUnlock()
 
+	// Inject proper auth.
+	err := p.injectAuthIntoRequestHeaders(req)
+	if err != nil {
+		p.srv.Logger().WithError(err).Debugln("auth required")
+		http.Error(rw, "", http.StatusForbidden)
+		return
+	}
+
 	// Proxy all.
 	p.srv.HandleWithProxy(proxy, http.HandlerFunc(p.handleNoProxy)).ServeHTTP(rw, req)
 }
@@ -111,6 +124,14 @@ func (p *KopanoGroupwareCorePlugin) handleSubscriptionsV1(rw http.ResponseWriter
 	p.mutex.RLock()
 	proxy := p.subscriptionProxy
 	p.mutex.RUnlock()
+
+	// Inject proper auth.
+	err := p.injectAuthIntoRequestHeaders(req)
+	if err != nil {
+		p.srv.Logger().WithError(err).Debugln("auth required")
+		http.Error(rw, "", http.StatusForbidden)
+		return
+	}
 
 	// Proxy all.
 	p.srv.HandleWithProxy(proxy, http.HandlerFunc(p.handleNoProxy)).ServeHTTP(rw, req)

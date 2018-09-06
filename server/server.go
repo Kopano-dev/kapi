@@ -50,8 +50,7 @@ type Server struct {
 	iss      *url.URL
 	provider *kcoidc.Provider
 
-	requestLog           bool
-	allowAuthPassthrough bool
+	requestLog bool
 }
 
 // NewServer creates a new Server with the provided parameters.
@@ -75,8 +74,7 @@ func NewServer(listenAddr string, pluginsPath string, iss *url.URL, enabledPlugi
 		iss:      iss,
 		provider: provider,
 
-		requestLog:           os.Getenv("KOPANO_DEBUG_SERVER_REQUEST_LOG") == "1",
-		allowAuthPassthrough: os.Getenv("KOPANO_ALLOW_AUTH_PASSTHROUGH") == "1",
+		requestLog: os.Getenv("KOPANO_DEBUG_SERVER_REQUEST_LOG") == "1",
 	}
 
 	err = s.loadPlugins()

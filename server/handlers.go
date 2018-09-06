@@ -23,19 +23,11 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dgrijalva/jwt-go"
 	kcoidc "stash.kopano.io/kc/libkcoidc"
 
 	"stash.kopano.io/kc/kapi/auth"
 	"stash.kopano.io/kc/kapi/proxy"
-)
-
-const (
-	// AuthRequestHeaderName defines the request header which holds the ID of
-	// the authenticated user.
-	AuthRequestHeaderName = "X-Kopano-UserEntryID"
-	// UsernameRequestHeaderName defines the request header which holds the
-	// username of the authenticated user.
-	UsernameRequestHeaderName = "X-Kopano-Username"
 )
 
 // HealthCheckHandler a http handler return 200 OK when server health is fine.
@@ -49,7 +41,8 @@ func (s *Server) AccessTokenRequired(next http.Handler, scopesRequired []string)
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		var err error
 
-		var claims *kcoidc.ExtraClaimsWithType
+		var standardClaims *jwt.StandardClaims
+		var extraClaims *kcoidc.ExtraClaimsWithType
 		var authenticatedUserID string
 
 		// TODO(longsleep): This code should be at a central location. It can
@@ -61,24 +54,24 @@ func (s *Server) AccessTokenRequired(next http.Handler, scopesRequired []string)
 				err = errors.New("invalid Bearer authorization header format")
 				break
 			}
-			authenticatedUserID, _, claims, err = s.provider.ValidateTokenString(req.Context(), authHeader[1])
+			authenticatedUserID, standardClaims, extraClaims, err = s.provider.ValidateTokenString(req.Context(), authHeader[1])
 
 		default:
 			err = errors.New("Bearer authorization required")
 		}
 
 		if err == nil {
-			if claims != nil && claims.KCTokenType() == kcoidc.TokenTypeKCAccess {
+			if extraClaims != nil && extraClaims.KCTokenType() == kcoidc.TokenTypeKCAccess {
 				// TODO(longsleep): Support cases where the Subject is not a user entry ID.
-				err = claims.Valid()
+				err = extraClaims.Valid()
 			} else {
 				err = errors.New("missing access token claim")
 			}
 		}
 
 		if err == nil && len(scopesRequired) > 0 {
-			if claims != nil {
-				authorizedScopes := getKCAuthorizedScopesFromClaims(claims)
+			if extraClaims != nil {
+				authorizedScopes := auth.KCAuthorizedScopesFromClaims(extraClaims)
 				missingScopes := make([]string, 0)
 				for _, scope := range scopesRequired {
 					if ok, _ := authorizedScopes[scope]; !ok {
@@ -93,30 +86,12 @@ func (s *Server) AccessTokenRequired(next http.Handler, scopesRequired []string)
 			}
 		}
 
-		if err != nil {
-			if s.allowAuthPassthrough {
-				// NOTE(longsleep): Check for pass through of auth data.
-				authenticatedUserID = req.Header.Get(AuthRequestHeaderName)
-				if authenticatedUserID != "" {
-					err = nil
-				}
-			}
-		}
-
 		if err == nil && authenticatedUserID != "" {
-			req.Header.Set(AuthRequestHeaderName, authenticatedUserID)
-			if claims != nil {
-				kcIDUsername := getKCIDUsernameFromClaims(claims)
-				if kcIDUsername != "" {
-					req.Header.Set(UsernameRequestHeaderName, kcIDUsername)
-				} else {
-					err = errors.New("missing kc.identity with username")
-				}
-			}
-			req = req.WithContext(auth.ContextWithAuthenticatedUserID(req.Context(), authenticatedUserID))
-		} else {
-			req.Header.Del(AuthRequestHeaderName)
-			req.Header.Del(UsernameRequestHeaderName)
+			req = req.WithContext(auth.ContextWithRecord(req.Context(), &auth.Record{
+				AuthenticatedUserID: authenticatedUserID,
+				StandardClaims:      standardClaims,
+				ExtraClaims:         extraClaims,
+			}))
 		}
 
 		if err != nil {
