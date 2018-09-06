@@ -1,5 +1,5 @@
-hash: de364847825696845f0975b136358cf502adf2406a2645ed4f0f4a85b912575a
-updated: 2018-03-19T15:37:13.159665645+01:00
+hash: c8c92b857eec7fac0339e2fb17816d6268c991322c11788b85c36a56155057c0
+updated: 2018-09-06T16:30:51.192915385+02:00
 imports:
 - name: github.com/aead/chacha20
   version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
@@ -17,9 +17,9 @@ imports:
   version: 3f9db97f856818214da2e1057f8ad84803971cff
   repo: https://github.com/flynn/go-shlex
 - name: github.com/gorilla/context
-  version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: 53c1911da2b537f792e7cafcb446b05ffe33b996
+  version: e3702bed27f0d39777b0b37b664b6280e8ef8fbf
 - name: github.com/gorilla/securecookie
   version: 667fe4e3466a040b780561fe9b51a83a3753eefc
 - name: github.com/gorilla/websocket
@@ -99,6 +99,7 @@ imports:
   - ed25519/internal/edwards25519
   - hkdf
   - ocsp
+  - pbkdf2
   - ssh/terminal
 - name: golang.org/x/net
   version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
@@ -111,7 +112,7 @@ imports:
   - lex/httplex
   - publicsuffix
 - name: golang.org/x/sys
-  version: 35ef4487ce0a1ea5d4b616ffe71e34febe723695
+  version: 833a04a10549a95dc34458c195cbad61bbb6cb4d
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -137,12 +138,12 @@ imports:
   - cipher
   - json
 - name: gopkg.in/square/go-jose.v2
-  version: 6ee92191fea850cdcab9a18867abf5f521cdbadb
+  version: 8254d6c783765f38c8675fae4427a1fe73fbd09d
   subpackages:
   - cipher
   - json
 - name: stash.kopano.io/kc/libkcoidc
-  version: 3bf65c81aead72d2076386a9de2237e67d242cdb
+  version: 36b058db0a101c3d30829ca68877d6fa06b4ce56
 - name: stash.kopano.io/kgol/rndm
   version: 69ff9c69d5ce12d2fb19a552eab58ad657a5e8b2
 - name: stash.kopano.io/kwm/kwmserver

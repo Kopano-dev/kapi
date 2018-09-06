@@ -30,4 +30,4 @@ import:
 - package: github.com/cskr/pubsub
 - package: github.com/orcaman/concurrent-map
 - package: stash.kopano.io/kc/libkcoidc
-  version: ~0.2.0
+  version: ~0.4.0
