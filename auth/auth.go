@@ -42,7 +42,7 @@ type Record struct {
 // ID if present.
 func AuthenticatedUserIDFromContext(ctx context.Context) (string, bool) {
 	if v := ctx.Value(authRecordcontextKey); v != nil {
-		record, _ := v.(Record)
+		record, _ := v.(*Record)
 		return record.AuthenticatedUserID, true
 	}
 
