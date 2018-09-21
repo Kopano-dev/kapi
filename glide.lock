@@ -1,5 +1,5 @@
-hash: a59252bdf6a38ad23c02bde8bf587164f2d5eff9c85c81be03bf6fc17e021759
-updated: 2018-09-06T19:10:03.596214182+02:00
+hash: 057382928f897d7a245b149a832ff15e3adcd3f037c08021a784d81b7c5f358d
+updated: 2018-09-21T20:08:58.543414996+02:00
 imports:
 - name: github.com/aead/chacha20
   version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
@@ -10,7 +10,7 @@ imports:
   version: 349fcc471aaccc29cd074e1275f1a494323826cd
   repo: https://github.com/codahale/aesnicheck
 - name: github.com/cskr/pubsub
-  version: b312bed961a5b2746a79024e40b7c37e31091a6e
+  version: a1dc30a0b38055a251f1f04ceb4cc1c7207b0540
 - name: github.com/dgrijalva/jwt-go
   version: dbeaa9332f19a944acb5736b4456cfcc02140e29
 - name: github.com/flynn/go-shlex
@@ -85,7 +85,7 @@ imports:
 - name: github.com/spf13/cobra
   version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
 - name: github.com/spf13/pflag
-  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+  version: 9a97c102cda95a86cec2345a6f09f55a939babf5
 - name: github.com/xenolf/lego
   version: 4dde48a9b9916926a8dd4f69639c8dba40930355
   repo: https://github.com/xenolf/lego
@@ -112,7 +112,7 @@ imports:
   - lex/httplex
   - publicsuffix
 - name: golang.org/x/sys
-  version: 833a04a10549a95dc34458c195cbad61bbb6cb4d
+  version: 14742f9018cd6651ec7364dc6ee08af0baaa1031
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -143,7 +143,7 @@ imports:
   - cipher
   - json
 - name: stash.kopano.io/kc/libkcoidc
-  version: 169129732bc2528c67c1f4431b14abb8081964bc
+  version: 36bf351b5b11444dc6a6a46d341575e08775be1a
 - name: stash.kopano.io/kgol/rndm
   version: 69ff9c69d5ce12d2fb19a552eab58ad657a5e8b2
 - name: stash.kopano.io/kwm/kwmserver
