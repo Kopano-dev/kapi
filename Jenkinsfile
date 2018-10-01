@@ -26,8 +26,8 @@ pipeline {
 		stage('Lint') {
 			steps {
 				echo 'Linting..'
-				sh 'golint \$(glide nv) | tee golint.txt || true'
-				sh 'go vet \$(glide nv) | tee govet.txt || true'
+				sh 'make lint | tee golint.txt || true'
+				sh 'make vet | tee govet.txt || true'
 			}
 		}
 		stage('Build') {
@@ -46,6 +46,7 @@ pipeline {
 		stage('Dist') {
 			steps {
 				echo 'Dist..'
+				sh 'test -z "$(git diff --shortstat 2>/dev/null |tail -n1)" && echo "Clean check passed."'
 				sh 'make dist'
 			}
 		}
