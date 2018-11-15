@@ -1,4 +1,5 @@
 {
+	"mode": "dep",	
 	"header": "# Kopano API 3rd party notices\n\nCopyright 2018 Kopano and its licensors. See LICENSE.txt for license information. This document contains a list of open source components used in this project.\n",
 	"manual": {
 		"github.com/cskr/pubsub": "README.md"
