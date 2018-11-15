@@ -8,8 +8,6 @@ pipeline {
 		 }
 	}
 	environment {
-		GLIDE_VERSION = 'v0.13.1'
-		GLIDE_HOME = '/tmp/.glide'
 		GOBIN = '/usr/local/bin'
 		DEBIAN_FRONTEND = 'noninteractive'
 	}
@@ -17,7 +15,7 @@ pipeline {
 		stage('Bootstrap') {
 			steps {
 				echo 'Bootstrapping..'
-				sh 'curl -sSL https://github.com/Masterminds/glide/releases/download/$GLIDE_VERSION/glide-$GLIDE_VERSION-linux-amd64.tar.gz | tar -vxz -C /usr/local/bin --strip=1'
+				sh 'curl -sSL https://raw.githubusercontent.com/golang/dep/master/install.sh | sh'
 				sh 'go get -v github.com/golang/lint/golint'
 				sh 'go get -v github.com/tebeka/go2xunit'
 				sh 'apt-get update && apt-get install -y build-essential'
@@ -47,6 +45,7 @@ pipeline {
 			steps {
 				echo 'Dist..'
 				sh 'test -z "$(git diff --shortstat 2>/dev/null |tail -n1)" && echo "Clean check passed."'
+				sh 'make check'
 				sh 'make dist'
 			}
 		}
