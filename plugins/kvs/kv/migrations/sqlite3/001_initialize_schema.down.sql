@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS kv;
+
+DROP INDEX IF EXISTS idx_get;
+
+DROP INDEX IF EXISTS idx_no_dup;
+
+DROP INDEX IF EXISTS idx_collection;

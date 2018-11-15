@@ -7,5 +7,5 @@ if [ -z "$TOKEN_VALUE" ]; then
 	exit 1
 fi
 
-exec curl -H "Authorization: Bearer $TOKEN_VALUE" $@
+exec curl -H "Authorization: Bearer $TOKEN_VALUE" "$@"
 

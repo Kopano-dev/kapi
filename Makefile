@@ -23,7 +23,7 @@ BASE     = $(GOPATH)/src/$(PACKAGE)
 PKGS     = $(or $(PKG),$(shell cd $(BASE) && env GOPATH=$(GOPATH) $(GO) list ./... | grep -v "^$(PACKAGE)/vendor/"))
 TESTPKGS = $(shell env GOPATH=$(GOPATH) $(GO) list -f '{{ if or .TestGoFiles .XTestGoFiles }}{{ .ImportPath }}{{ end }}' $(PKGS) 2>/dev/null)
 CMDS     = $(or $(CMD),$(addprefix cmd/,$(notdir $(shell find "$(PWD)/cmd/" -type d))))
-PLUGINS  = $(or $(PLUGIN),$(addprefix plugins/,$(notdir $(shell find "$(PWD)/plugins/" -type d))))
+PLUGINS  = $(or $(PLUGIN),$(addprefix plugins/,$(notdir $(shell find "$(PWD)/plugins/" -maxdepth 1 -type d))))
 TIMEOUT  = 30
 
 export GOPATH CGO_ENABLED
