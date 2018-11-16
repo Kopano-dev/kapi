@@ -15,17 +15,20 @@ DEFAULT_PLUGINS_PATH=/usr/lib/kopano/kapi-plugins
 DEFAULT_OIDC_ISSUER_IDENTIFIER=https://localhost
 DEFAULT_KOPANO_GRAPI_SOCKETS=/var/run/kopano-grapi
 DEFAULT_PLUGIN_PUBS_SECRET_KEY_FILE=/etc/kopano/kapid-pubs-secret.key
+DEFAULT_PLUGIN_KVS_DRIVERNAME=sqlite3
+DEFAULT_PLUGIN_KVS_DB_DATASOURCE=/var/lib/kopano/kapi-kvs/kvs.db
+DEFAULT_PLUGIN_KVS_DB_MIGRATIONS=/usr/lib/kopano/kapi-kvs/db/migrations
 
 setup_env() {
 	# Plugin grapi environment.
 
-	KOPANO_GRAPI_SOCKETS=${KOPANO_GRAPI_SOCKETS:-${DEFAULT_KOPANO_GRAPI_SOCKETS}}
+	KOPANO_GRAPI_SOCKETS="${KOPANO_GRAPI_SOCKETS:-${DEFAULT_KOPANO_GRAPI_SOCKETS}}"
 	if [ -n "$plugin_grapi_socket_path" ]; then
-		KOPANO_GRAPI_SOCKETS=$plugin_grapi_socket_path
+		KOPANO_GRAPI_SOCKETS="${plugin_grapi_socket_path}"
 	fi
 	export KOPANO_GRAPI_SOCKETS
 
-	# Olugin pubs environment.
+	# Plugin pubs environment.
 
 	if [ -z "$plugin_pubs_secret_key" ]; then
 		if [ ! -f "${DEFAULT_PLUGIN_PUBS_SECRET_KEY_FILE}" -a "$SETUP" = "1" -a -n "$USER" ]; then
@@ -45,6 +48,21 @@ setup_env() {
 		KOPANO_PUBS_SECRET_KEY=$(cat "$plugin_pubs_secret_key")
 	fi
 	export KOPANO_PUBS_SECRET_KEY
+
+	# Plugin kvs environment.
+
+	if [ -z "$plugin_kvs_db_drivername" -a -z "$plugin_kvs_db_datasource" ]; then
+		plugin_kvs_db_datasource="${KOPANO_KVS_DB_DATASOURCE:-${DEFAULT_PLUGIN_KVS_DB_DATASOURCE}}"
+	fi
+	if [ -z "$plugin_kvs_db_drivername" ]; then
+		plugin_kvs_db_drivername="${KOPANO_KVS_DB_DRIVER:-${DEFAULT_PLUGIN_KVS_DRIVERNAME}}"
+	fi
+	if [ -z "$plugin_kvs_db_migrations" ]; then
+		plugin_kvs_db_migrations="${KOPANO_KVS_DB_MIGRATIONS:-${DEFAULT_PLUGIN_KVS_DB_MIGRATIONS}}"
+	fi
+	export KOPANO_KVS_DB_DRIVER="${plugin_kvs_db_drivername}"
+	export KOPANO_KVS_DB_DATASOURCE="${plugin_kvs_db_datasource}"
+	export KOPANO_KVS_DB_MIGRATIONS="${plugin_kvs_db_migrations}"
 }
 
 # Handle parameters for configuration.
