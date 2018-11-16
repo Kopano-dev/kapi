@@ -96,7 +96,7 @@ $(TEST_TARGETS): test
 
 .PHONY: test
 test: vendor | $(BASE) ; $(info running $(NAME:%=% )tests ...)	@
-	@cd $(BASE) && CGO_ENABLED=$(CGO_ENABLED) $(GO) test -timeout $(TIMEOUT)s $(ARGS) $(TESTPKGS)
+	@cd $(BASE) && CGO_ENABLED=1 $(GO) test -timeout $(TIMEOUT)s $(ARGS) $(TESTPKGS)
 
 TEST_XML_TARGETS := test-xml-default test-xml-short test-xml-race
 .PHONY: $(TEST_XML_TARGETS)
@@ -109,7 +109,7 @@ $(TEST_XML_TARGETS): test-xml
 .PHONY: test-xml
 test-xml: vendor | $(BASE) ; $(info running $(NAME:%=% )tests ...)	@
 	@mkdir -p test
-	cd $(BASE) && 2>&1 CGO_ENABLED=$(CGO_ENABLED) $(GO) test -timeout $(TIMEOUT)s $(ARGS) -v $(TESTPKGS) | tee test/tests.output
+	cd $(BASE) && 2>&1 CGO_ENABLED=1 $(GO) test -timeout $(TIMEOUT)s $(ARGS) -v $(TESTPKGS) | tee test/tests.output
 	$(shell test -s test/tests.output && $(GO2XUNIT) -fail -input test/tests.output -output test/tests.xml)
 
 # Dep
