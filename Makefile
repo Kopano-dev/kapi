@@ -135,6 +135,7 @@ dist: 3rdparty-LICENSES.md ; $(info building dist tarball ...)
 	@rm -rf "dist/${PACKAGE_NAME}-${VERSION}"
 	@mkdir -p "dist/${PACKAGE_NAME}-${VERSION}"
 	@mkdir -p "dist/${PACKAGE_NAME}-${VERSION}/scripts"
+	@mkdir -p "dist/${PACKAGE_NAME}-${VERSION}/db/kvs"
 	@cd dist && \
 	cp -avf ../LICENSE.txt "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../README.md "${PACKAGE_NAME}-${VERSION}" && \
@@ -144,6 +145,7 @@ dist: 3rdparty-LICENSES.md ; $(info building dist tarball ...)
 	cp -avf ../scripts/kopano-kapid.binscript "${PACKAGE_NAME}-${VERSION}/scripts" && \
 	cp -avf ../scripts/kopano-kapid.service "${PACKAGE_NAME}-${VERSION}/scripts" && \
 	cp -avf ../scripts/kapid.cfg "${PACKAGE_NAME}-${VERSION}/scripts" && \
+	cp -avfr ../plugins/kvs/kv/migrations  "${PACKAGE_NAME}-${VERSION}/db/kvs" && \
 	tar --owner=0 --group=0 -czvf ${PACKAGE_NAME}-${VERSION}.tar.gz "${PACKAGE_NAME}-${VERSION}" && \
 	cd ..
 
