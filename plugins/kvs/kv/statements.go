@@ -30,6 +30,7 @@ const (
 	stmtIDGet stmtID = iota
 	stmtIDGetCollection
 	stmtIDCreateOrUpdate
+	stmtIDDelete
 )
 
 // NOTE(longsleep): Those statements must work with both MySQL and SQLite3.
@@ -71,6 +72,13 @@ var preparedStmts = map[stmtID]string{
 			realm,
 			required_scopes
 		) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`,
+
+	stmtIDDelete: `
+		DELETE FROM kv WHERE
+			ekey = ? AND
+			owner_id = ? AND
+			client_id = ? AND
+			realm = ?`,
 }
 
 func prepareStmts(db *sql.DB, dbDriverName string) (map[stmtID]*sql.Stmt, error) {

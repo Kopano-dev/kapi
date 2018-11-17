@@ -47,6 +47,8 @@ func (p *KVSPlugin) handleUserKV(rw http.ResponseWriter, req *http.Request) {
 		p.handleCreateOrUpdate(rw, req, "user", key, user)
 		return
 	case http.MethodDelete:
+		p.handleDelete(rw, req, "user", key, user)
+		return
 	}
 
 	http.Error(rw, "", http.StatusNotImplemented)
@@ -172,4 +174,25 @@ func (p *KVSPlugin) handleCreateOrUpdate(rw http.ResponseWriter, req *http.Reque
 	}
 
 	rw.WriteHeader(http.StatusOK)
+}
+
+func (p *KVSPlugin) handleDelete(rw http.ResponseWriter, req *http.Request, realm string, key string, user *auth.Record) {
+	record := &kv.Record{
+		Key:      key,
+		OwnerID:  user.AuthenticatedUserID,
+		ClientID: user.StandardClaims.Audience,
+	}
+
+	ok, err := p.store.Delete(req.Context(), realm, record)
+	if err != nil {
+		p.srv.Logger().Debugf("kvs: failed to delete from kv: %v", err)
+		http.Error(rw, "", http.StatusInternalServerError)
+		return
+	}
+
+	if ok {
+		rw.WriteHeader(http.StatusOK)
+	} else {
+		rw.WriteHeader(http.StatusNotFound)
+	}
 }

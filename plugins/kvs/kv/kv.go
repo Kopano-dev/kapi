@@ -295,7 +295,28 @@ func (kv *KV) CreateOrUpdate(ctx context.Context, realm string, record *Record) 
 	if err != nil {
 		return err
 	}
-	kv.logger.Debugf("kv: create or update ID = %d, affected = %d\n", lastInsertID, rowsAffected)
+	kv.logger.Debugf("kv: create or update ID = %d, affected = %d", lastInsertID, rowsAffected)
 
 	return nil
+}
+
+// Delete implements removal by key from data store.
+func (kv *KV) Delete(ctx context.Context, realm string, record *Record) (bool, error) {
+	stmt, err := kv.Stmt(ctx, stmtIDDelete)
+	if err != nil {
+		return false, err
+	}
+
+	res, err := stmt.ExecContext(ctx, record.Key, record.OwnerID, record.ClientID, realm)
+	if err != nil {
+		return false, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	kv.logger.Debugf("kv: delete affected = %d", rowsAffected)
+
+	return rowsAffected > 0, nil
 }
