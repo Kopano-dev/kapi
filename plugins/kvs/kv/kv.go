@@ -42,6 +42,7 @@ const (
 )
 
 const (
+	maxOpenDBConnections     = 10
 	waitForInitializeTimeout = 5 * time.Second
 	dbConnectionTimeout      = 10 * time.Second
 	dbMigrateLockTimeout     = 15 * time.Second
@@ -124,6 +125,9 @@ func (kv *KV) Initialize(parentCtx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	db.SetMaxOpenConns(maxOpenDBConnections)
+	db.SetConnMaxLifetime(0) // Reuse connections forever.
 
 	testCtx, timeout := context.WithTimeout(ctx, dbConnectionTimeout)
 	defer timeout()
