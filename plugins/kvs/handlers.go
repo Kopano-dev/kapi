@@ -78,20 +78,14 @@ func (p *KVSPlugin) handleGet(rw http.ResponseWriter, req *http.Request, realm s
 		return
 	}
 
-	if len(result) == 0 {
-		if !recurse {
-			http.NotFound(rw, req)
-			return
-		}
-		// Fake collection.
-		result = append(result, &kv.Record{
-			Key:         key,
-			ContentType: "application/json",
-			Value:       []byte("[]"),
-		})
+	if !recurse && len(result) == 0 {
+		// Return nothing.
+		http.NotFound(rw, req)
+		return
 	}
 
 	if recurse || len(result) > 1 {
+		// Return as array.
 		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusOK)
 		rw.Write([]byte("[\n"))
@@ -115,6 +109,7 @@ func (p *KVSPlugin) handleGet(rw http.ResponseWriter, req *http.Request, realm s
 		}
 		rw.Write([]byte("]\n"))
 	} else {
+		// Return entry.
 		r := result[0]
 		var d []byte
 		if raw {
