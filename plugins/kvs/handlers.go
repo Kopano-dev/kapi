@@ -91,7 +91,7 @@ func (p *KVSPlugin) handleGet(rw http.ResponseWriter, req *http.Request, realm s
 		})
 	}
 
-	if len(result) > 1 {
+	if recurse || len(result) > 1 {
 		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusOK)
 		rw.Write([]byte("[\n"))
