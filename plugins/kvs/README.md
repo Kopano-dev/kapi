@@ -52,8 +52,20 @@ PUT /kv/${realm}/${collection/key/path}
 200
 ```
 
+```
+PUT /kv/${realm}/${collection/prefix}?batch=1
+200
+```
+
 The `realm` is the realm which defines kv storage behavior. Rest of the URL is
 the key where the first part becomes the `collection`.
+
+If the batch parameter is given, the kvs accepts a JSON array as input data
+similar to what is returned by Get in recurse=1 mode. All keys of the entries
+will have the collection and prefix used from the URL. Batch mode is
+transactional and will only complete if all entries have been written using
+ReadCommited transaction isolation. Entry values must be Base64 encoded if the
+entry `content_type` attribute is not `application/json`.
 
 ### Get
 

@@ -312,6 +312,40 @@ func (kv *KV) CreateOrUpdate(ctx context.Context, realm string, record *Record) 
 	return nil
 }
 
+// BatchCreateOrUpdate implements batch mode data storage.
+func (kv *KV) BatchCreateOrUpdate(ctx context.Context, realm string, records []*Record) error {
+	tx, err := kv.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.PrepareContext(ctx, preparedStmts[stmtIDCreateOrUpdate])
+	if err != nil {
+		return err
+	}
+
+	var totalRowsAffected int64
+	for _, record := range records {
+		res, execErr := stmt.ExecContext(ctx, record.Collection, record.Key, record.Value, record.ContentType, record.OwnerID, record.ClientID, realm, record.RequiredScopes)
+		if execErr != nil {
+			_ = tx.Rollback()
+			return execErr
+		}
+		rowsAffected, execErr := res.RowsAffected()
+		if execErr == nil {
+			totalRowsAffected += rowsAffected
+		}
+	}
+
+	kv.logger.Debugf("kv: batch create or update, affected = %d", totalRowsAffected)
+	if totalRowsAffected == 0 {
+		_ = tx.Rollback()
+		return nil
+	}
+
+	return tx.Commit()
+}
+
 // Delete implements removal by key from data store.
 func (kv *KV) Delete(ctx context.Context, realm string, record *Record) (bool, error) {
 	stmt, err := kv.Stmt(ctx, stmtIDDelete)

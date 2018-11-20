@@ -162,7 +162,7 @@ func TestKVCreateAndDelete(t *testing.T) {
 	recordCreate := &Record{
 		Collection:  &collection,
 		Key:         "test1/doc1",
-		Value:       []byte("test"),
+		Value:       []byte("aGVsbG8K"),
 		ContentType: "text/plain",
 		OwnerID:     ownerID,
 		ClientID:    clientID,
@@ -207,7 +207,7 @@ func TestKVGetAndUpdateGet(t *testing.T) {
 	recordCreate := &Record{
 		Collection:  &collection,
 		Key:         "test1/doc2",
-		Value:       []byte("test"),
+		Value:       []byte("aGVsbG8K"),
 		ContentType: "text/plain",
 		OwnerID:     ownerID,
 		ClientID:    clientID,
@@ -256,7 +256,7 @@ func TestKVGetRecurse(t *testing.T) {
 	recordCreate1 := &Record{
 		Collection:  &collection,
 		Key:         "/doc1",
-		Value:       []byte("hello"),
+		Value:       []byte("aGVsbG8K"),
 		ContentType: "text/plain",
 		OwnerID:     ownerID,
 		ClientID:    clientID,
@@ -268,7 +268,7 @@ func TestKVGetRecurse(t *testing.T) {
 	recordCreate2 := &Record{
 		Collection:  recordCreate1.Collection,
 		Key:         "/doc2",
-		Value:       []byte("world"),
+		Value:       []byte("aGVsbG8K"),
 		ContentType: "text/plain",
 		OwnerID:     recordCreate1.OwnerID,
 		ClientID:    recordCreate1.ClientID,
@@ -286,5 +286,42 @@ func TestKVGetRecurse(t *testing.T) {
 	records := kvGet(ctx, t, kv, recordGet, localRealm)
 	if len(records) != 2 {
 		t.Fatalf("get collection yielded wrong number of records: %v\n", len(records))
+	}
+}
+
+func TestKVBatchCreateOrUpdate(t *testing.T) {
+	kv := localTestKV
+	ctx := context.Background()
+
+	collection := "batchCreateOrUpdate"
+	ownerID := "ownerD"
+	clientID := "clientD"
+	number := 100
+
+	records := make([]*Record, number, number)
+	for i := 0; i < number; i++ {
+		records[i] = &Record{
+			Collection:  &collection,
+			Key:         "num" + string(i),
+			Value:       []byte("aGVsbG8K"),
+			ContentType: "text/plain",
+			OwnerID:     ownerID,
+			ClientID:    clientID,
+		}
+	}
+
+	err := kv.BatchCreateOrUpdate(ctx, localRealm, records)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	recordGet := &Record{
+		Collection: &collection,
+		OwnerID:    ownerID,
+		ClientID:   clientID,
+	}
+	records = kvGet(ctx, t, kv, recordGet, localRealm)
+	if len(records) != number {
+		t.Fatalf("get collection after batch yielded wrong number of records: %v\n", len(records))
 	}
 }

@@ -37,7 +37,8 @@ type Record struct {
 	RequiredScopes string
 }
 
-type recordJSON struct {
+// A RecordJSON is the public JSON representation fo a Record.
+type RecordJSON struct {
 	Key         *string         `json:"key"`
 	Value       json.RawMessage `json:"value"`
 	ContentType string          `json:"content_type,omitempty"`
@@ -45,7 +46,7 @@ type recordJSON struct {
 
 // EncodeToJSON encodes the accociated Record to JSON.
 func (r *Record) EncodeToJSON() (json.RawMessage, error) {
-	j := &recordJSON{
+	j := &RecordJSON{
 		Key: &r.Key,
 	}
 

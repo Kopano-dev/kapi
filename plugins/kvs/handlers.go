@@ -18,6 +18,9 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -44,7 +47,11 @@ func (p *KVSPlugin) handleUserKV(rw http.ResponseWriter, req *http.Request) {
 		p.handleGet(rw, req, "user", key, user)
 		return
 	case http.MethodPut:
-		p.handleCreateOrUpdate(rw, req, "user", key, user)
+		if req.Form.Get("batch") == "1" {
+			p.handleBatchCreateOrUpdate(rw, req, "user", key, user)
+		} else {
+			p.handleCreateOrUpdate(rw, req, "user", key, user)
+		}
 		return
 	case http.MethodDelete:
 		p.handleDelete(rw, req, "user", key, user)
@@ -164,6 +171,63 @@ func (p *KVSPlugin) handleCreateOrUpdate(rw http.ResponseWriter, req *http.Reque
 	err = p.store.CreateOrUpdate(req.Context(), realm, record)
 	if err != nil {
 		p.srv.Logger().Debugf("kvs: failed to create or update from kv: %v", err)
+		http.Error(rw, "", http.StatusInternalServerError)
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+}
+
+func (p *KVSPlugin) handleBatchCreateOrUpdate(rw http.ResponseWriter, req *http.Request, realm string, key string, user *auth.Record) {
+	req.Body = http.MaxBytesReader(rw, req.Body, valueSizeLimit*500)
+
+	inRecords := make([]*kv.RecordJSON, 0)
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(&inRecords)
+	if err != nil {
+		p.srv.Logger().Debugf("kvs: failed to parse create or update batch data: %v", err)
+		http.Error(rw, "", http.StatusBadRequest)
+		return
+	}
+
+	if len(inRecords) == 0 {
+		// Nothing to do.
+		rw.WriteHeader(http.StatusOK)
+		return
+	}
+
+	var collection string
+	parts := strings.SplitN(key, "/", 2)
+	if len(parts) > 0 {
+		collection = parts[0]
+	}
+
+	records := make([]*kv.Record, len(inRecords))
+	for i, ir := range inRecords {
+		records[i] = &kv.Record{
+			Collection:  &collection,
+			Key:         key + "/" + *ir.Key,
+			ContentType: ir.ContentType,
+			OwnerID:     user.AuthenticatedUserID,
+			ClientID:    user.StandardClaims.Audience,
+		}
+		if strings.HasPrefix(ir.ContentType, "application/json") {
+			records[i].Value = ir.Value
+		} else {
+			// Base64 decode.
+			records[i].Value = make([]byte, base64.StdEncoding.DecodedLen(len(ir.Value)))
+			_, err = base64.StdEncoding.Decode(records[i].Value, bytes.Trim(ir.Value, "\""))
+			if err != nil {
+				p.srv.Logger().Debugf("kvs: failed to decode create or update batch data value: %v", err)
+				http.Error(rw, "", http.StatusBadRequest)
+				return
+			}
+		}
+	}
+
+	err = p.store.BatchCreateOrUpdate(req.Context(), realm, records)
+	if err != nil {
+		p.srv.Logger().Debugf("kvs: failed to batch create or update from kv: %v", err)
 		http.Error(rw, "", http.StatusInternalServerError)
 		return
 	}
