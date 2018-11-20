@@ -94,10 +94,8 @@ func New(dbDriverName string, dbDataSourceName string, dbMigrationsBasePath stri
 // Initialize connects to the associated KV store and runs migrations
 // as required.
 func (kv *KV) Initialize(parentCtx context.Context) error {
-	logger := kv.logger
 	dbDriverName := kv.dbDriverName
 	dbDataSourceName := kv.dbDataSourceName
-	dbMigrationsSource := kv.dbMigrationsSource
 
 	kv.Lock()
 	select {
@@ -125,6 +123,16 @@ func (kv *KV) Initialize(parentCtx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	return kv.initialize(ctx, db)
+}
+
+func (kv *KV) initialize(ctx context.Context, db *sql.DB) error {
+	var err error
+
+	logger := kv.logger
+	dbDriverName := kv.dbDriverName
+	dbMigrationsSource := kv.dbMigrationsSource
 
 	db.SetMaxOpenConns(maxOpenDBConnections)
 	db.SetConnMaxLifetime(0) // Reuse connections forever.
