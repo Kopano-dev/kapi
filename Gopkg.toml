@@ -1,29 +1,17 @@
-# Gopkg.toml example
-#
 # Refer to https://golang.github.io/dep/docs/Gopkg.toml.html
 # for detailed Gopkg.toml documentation.
-#
-# required = ["github.com/user/thing/cmd/thing"]
-# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
-#
-# [[constraint]]
-#   name = "github.com/user/project"
-#   version = "1.0.0"
-#
-# [[constraint]]
-#   name = "github.com/user/project2"
-#   branch = "dev"
-#   source = "github.com/myfork/project2"
-#
-# [[override]]
-#   name = "github.com/x/y"
-#   version = "2.4.0"
-#
-# [prune]
-#   non-go = false
-#   go-tests = true
-#   unused-packages = true
 
+[prune]
+  go-tests = true
+  unused-packages = true
+
+[[override]]
+  name = "github.com/xenolf/lego"
+  revision = "fad2257e11ae4ff31ed03739386873aa405dec2d"
+
+[[override]]
+  name = "github.com/russross/blackfriday"
+  revision = "067529f716f4c3f5e37c8c95ddd59df1007290ae"
 
 [[constraint]]
   name = "github.com/cskr/pubsub"
@@ -47,7 +35,7 @@
 
 [[constraint]]
   name = "github.com/mholt/caddy"
-  version = "0.10.10"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/rs/cors"
@@ -72,7 +60,3 @@
 [[constraint]]
   name = "stash.kopano.io/kwm/kwmserver"
   version = "0.4.0"
-
-[prune]
-  go-tests = true
-  unused-packages = true
