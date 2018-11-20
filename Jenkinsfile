@@ -18,6 +18,9 @@ pipeline {
 				sh 'curl -sSL https://raw.githubusercontent.com/golang/dep/master/install.sh | sh'
 				sh 'go get -v github.com/golang/lint/golint'
 				sh 'go get -v github.com/tebeka/go2xunit'
+				sh 'go get -v github.com/axw/gocov/...'
+				sh 'go get -v github.com/AlekSi/gocov-xml'
+				sh 'go get -v github.com/wadey/gocovmerge'
 				sh 'apt-get update && apt-get install -y build-essential'
 			}
 		}
@@ -36,9 +39,25 @@ pipeline {
 			}
 		}
 		stage('Test') {
+			when {
+				not {
+					branch 'master'
+				}
+			}
 			steps {
 				echo 'Testing..'
 				sh 'make test-xml-short'
+			}
+		}
+		stage('Test with coverage') {
+			when {
+				branch 'master'
+			}
+			steps {
+				echo 'Testing with coverage..'
+				sh 'make test-coverage COVERAGE_DIR=test/coverage.jenkins'
+				publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'test/coverage.jenkins', reportFiles: 'coverage.html', reportName: 'Go Coverage Report HTML', reportTitles: ''])
+				step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'test/coverage.jenkins/coverage.xml', failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
 			}
 		}
 		stage('Dist') {
