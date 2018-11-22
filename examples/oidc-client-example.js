@@ -64,6 +64,7 @@ window.app = new Vue({
 		webhookClientState: 'whcs-' + new Date().getTime(),
 
 		pubs: null,
+		pubsOptions: {},
 	},
 	components: {
 	},
@@ -362,11 +363,11 @@ window.app = new Vue({
 			console.log('user updated', user);
 			if (user) {
 				Vue.http.headers.common['Authorization'] = user.token_type + ' ' + user.access_token;
-				if (!this.webhook) {
-					this.registerWebhook();
-				}
+				Object.assign(this.pubsOptions, {
+					authorizationValue: user.access_token,
+					authorizationType: user.token_type
+				});
 				if (!this.pubs) {
-					Pubs.init({authorizationValue: user.access_token, authorizationType: user.token_type});
 					this.connectPubs();
 				}
 			}
@@ -609,35 +610,47 @@ window.app = new Vue({
 				return {};
 			}).then(async webhook => {
 				this.webhook = webhook;
-				console.info('webhook registered', webhook);
+				console.info('pubs webhook registered', webhook);
 				if (this.pubs) {
 					// Subscribe our webhooks topic.
-					const topic = this.webhook.topic;
+					const topic = webhook.topic;
 					console.info('pubs subscribing webhook topic', topic);
 					await this.pubs.sub([topic]);
-					console.log('pubs subscribed', topic);
+					console.log('pubs subscribed after register webhook topic', topic);
 				}
 			});
 		},
 
 		connectPubs: async function() {
-			const pubs = new Pubs();
-			await pubs.connect();
+			const pubs = new Pubs.Pubs('', this.pubsOptions);
+			pubs.onstatechanged = (event) => {
+				console.log('pubs state changed event', event.connected, event.connecting, event.reconnecting, event);
+				if (!event.connected) {
+					this.webhook = null;
+				} else {
+					setTimeout(this.registerWebhook, 0);
+				}
+			}
+			pubs.onstreamevent = (event) => {
+				console.log('pubs stream event', event.data, event.info, event);
+			}
 			this.pubs = pubs;
+			await pubs.connect();
 			if (this.webhook && this.webhook.topic) {
 				// Subscribe to webhook topic.
 				const topic = this.webhook.topic;
 				console.info('pubs subscribing webhook topic to newly created pubs', topic);
-				pubs.onstreamevent = (event) => {
-					console.log('pubs stream event', event.data, event.info, event);
-				}
 				await this.pubs.sub([topic]);
-				console.log('pubs subscribed', topic);
+				console.log('pubs subscribed webhook topic to newly created pubs after connect', topic);
 			}
 		},
 
 		createSubscription: async function() {
 			console.log('create subscription', this.requestContext);
+
+			if (!this.webhook || !this.webhook.pubUrl) {
+				throw new Error('cannot subscribe without an active webhook', this.webhook);
+			}
 
 			const resource = this.requestContext;
 
