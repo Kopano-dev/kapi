@@ -70,6 +70,7 @@ window.app = new Vue({
 	},
 	created: function() {
 		console.info('welcome to Kopanpo API oidc-client example');
+		console.info('using pubs version ' + Pubs.version);
 
 		const queryValues = parseParams(location.search.substr(1));
 		console.log('URL query values on load', queryValues);
