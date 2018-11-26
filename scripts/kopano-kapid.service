@@ -9,7 +9,6 @@ Group=kopano
 NoNewPrivileges=yes
 ProtectSystem=full
 CapabilityBoundingSet=
-ProtectSystem=full
 UMask=0027
 LimitNOFILE=infinity
 PermissionsStartOnly=true
