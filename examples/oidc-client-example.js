@@ -30,6 +30,7 @@ window.app = new Vue({
 		clientID: '',
 		prompt: null,
 
+		server: '',
 		apiPrefix: '/api/gc/v1',
 		pubsPrefix: '/api/pubs/v1',
 
@@ -86,9 +87,14 @@ window.app = new Vue({
 		if (!clientID) {
 			clientID = "oidc-client-example.js";
 		}
+		let server = queryValues.server;
+		if (!server) {
+			server = window.location.protocol + '//' + window.location.host;
+		}
 
 		this.iss = iss;
 		this.clientID = clientID;
+		this.server = server;
 		this.prompt = '';
 
 		this.$nextTick(() => {
@@ -497,7 +503,7 @@ window.app = new Vue({
 				url += '?startDateTime=2017-02-26T09:13:19.540&endDateTime=2018-03-05T09:13:19.540';
 			}
 
-			return this.doRequest(this.apiPrefix + url, key);
+			return this.doRequest(this.server + this.apiPrefix + url, key);
 		},
 
 		doRequest: async function(url, requestKey) {
@@ -546,7 +552,7 @@ window.app = new Vue({
 				}
 			};
 
-			return this.gcPost(this.apiPrefix + '/me/sendMail', {
+			return this.gcPost(this.server + this.apiPrefix + '/me/sendMail', {
 				message: payload
 			}).then(response => {
 				this.createStatus = this.requestStatus;
@@ -569,7 +575,7 @@ window.app = new Vue({
 				}
 			};
 
-			return this.gcPost(this.apiPrefix + '/me/calendar/events', payload).then(response => {
+			return this.gcPost(this.server + this.apiPrefix + '/me/calendar/events', payload).then(response => {
 				this.createStatus = this.requestStatus;
 
 				return response;
@@ -590,7 +596,7 @@ window.app = new Vue({
 				]
 			};
 
-			return this.gcPost(this.apiPrefix + '/me/contactFolders/contacts/contacts', payload).then(response => {
+			return this.gcPost(this.server + this.apiPrefix + '/me/contactFolders/contacts/contacts', payload).then(response => {
 				this.createStatus = this.requestStatus;
 
 				return response;
@@ -598,7 +604,7 @@ window.app = new Vue({
 		},
 
 		registerWebhook: async function() {
-			return this.$http.post(this.pubsPrefix + '/webhook').then(response => {
+			return this.$http.post(this.server + this.pubsPrefix + '/webhook').then(response => {
 				if (response.headers.get('content-type').indexOf('application/json') !== 0) {
 					// Require JSON response, everything else is an error.
 					throw response;
@@ -667,7 +673,7 @@ window.app = new Vue({
 
 			this.subscriptionStatus = null;
 			const start = new Date();
-			return this.$http.post(this.apiPrefix + '/subscriptions', payload).then(response => {
+			return this.$http.post(this.server + this.apiPrefix + '/subscriptions', payload).then(response => {
 				if (response.headers.get('content-type').indexOf('application/json') !== 0) {
 					// Require JSON response, everything else is an error.
 					throw response;
