@@ -31,6 +31,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/websocket"
 	"github.com/orcaman/concurrent-map"
+	"github.com/rs/cors"
 	"stash.kopano.io/kgol/rndm"
 
 	"stash.kopano.io/kc/kapi/plugins"
@@ -60,6 +61,8 @@ var scopesRequired = []string{"kopano/gc"}
 type PubsPlugin struct {
 	ctx context.Context
 	srv plugins.ServerV1
+
+	cors *cors.Cors
 
 	handler   http.Handler
 	keys      cmap.ConcurrentMap
@@ -110,6 +113,11 @@ func (p *PubsPlugin) Initialize(ctx context.Context, errCh chan<- error, srv plu
 
 	if len(hashKey) < 32 {
 		return fmt.Errorf("pubs: secret key too small, at least 32 bytes are required")
+	}
+
+	if os.Getenv("KOPANO_PUBS_ALLOW_CORS") == "1" {
+		p.srv.Logger().Warnln("pubs: CORS support enabled")
+		p.cors = cors.AllowAll()
 	}
 
 	scopesRequiredString := os.Getenv("KOPANO_PUBS_REQUIRED_SCOPES")

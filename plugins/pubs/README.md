@@ -11,6 +11,11 @@ the key should not change and can be provided as hex encoded value by the
 `KOPANO_PUBS_SECRET_KEY` environment variable. A suitable key value can be
 created with with `openssl rand -hex 64`.
 
+`KOPANO_PUBS_ALLOW_CORS` is an environment variable which if set to `1`
+enables CORS (Cross Origin Resource Sharing) HTTP requests and headers so that
+the REST endpoints provided by this plugin can be used from a browser cross
+origin.
+
 ## HTTP API v1
 
 The base URL to this API is `/api/pubs/v1`. All example URLs are sub paths of
