@@ -8,13 +8,9 @@ VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2>/dev/null |
 .PHONY: all
 all:
 
-pubjs/umd/pubs.js:
-
 .PHONY: dist
-dist: pubsjs/umd/pubs.js ; $(info building dist tarball ...)
+dist: ; $(info building dist tarball ...)
 	@mkdir -p "dist/${PACKAGE_NAME}-${VERSION}"
-	@mkdir -p "dist/${PACKAGE_NAME}-${VERSION}/pubsjs/umd"
-	cp -avf pubsjs/umd/pubs.js "dist/${PACKAGE_NAME}-${VERSION}/pubsjs/umd/"
 	@cd dist && \
 	cp -avf ../*.html "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../*.css "${PACKAGE_NAME}-${VERSION}" && \
