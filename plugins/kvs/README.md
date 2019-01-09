@@ -24,6 +24,11 @@ for details.
 where to find database migrations. It must point to a folder which contains a
 sub folder which name matches the configured database driver.
 
+`KOPANO_KVS_ALLOW_CORS` is an environment variable which if set to `1`
+enables CORS (Cross Origin Resource Sharing) HTTP requests and headers so that
+the REST endpoints provided by this plugin can be used from a browser cross
+origin.
+
 ## HTTP API v1
 
 The base URL to this API is `/api/kvs/v1`. All example URLs are sub paths of

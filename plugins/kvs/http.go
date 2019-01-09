@@ -51,6 +51,11 @@ func (p *KVSPlugin) ServeHTTP(rw http.ResponseWriter, req *http.Request) (bool, 
 		return false, nil
 	}
 
+	// Add support for CORS if configured.
+	if p.cors != nil {
+		handler = p.cors.Handler(handler)
+	}
+
 	// Execute handler.
 	handler.ServeHTTP(rw, req)
 

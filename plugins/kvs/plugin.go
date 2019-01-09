@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 
 	"stash.kopano.io/kc/kapi/plugins"
 	"stash.kopano.io/kc/kapi/plugins/kvs/kv"
@@ -45,6 +46,8 @@ var pluginInfo = &plugins.InfoV1{
 type KVSPlugin struct {
 	ctx context.Context
 	srv plugins.ServerV1
+
+	cors *cors.Cors
 
 	quit    chan struct{}
 	handler http.Handler
@@ -91,6 +94,11 @@ func (p *KVSPlugin) Initialize(ctx context.Context, errCh chan<- error, srv plug
 			}
 		}
 	}()
+
+	if os.Getenv("KOPANO_KVS_ALLOW_CORS") == "1" {
+		p.srv.Logger().Warnln("kvs: CORS support enabled")
+		p.cors = cors.AllowAll()
+	}
 
 	srv.Logger().Debugln("kvs: initialize")
 	return nil
