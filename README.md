@@ -6,7 +6,7 @@ via HTTP APIs.
 ## TL;DW
 
 Make sure you have Go 1.8 or later installed. This assumes your GOPATH is `~/go` and
-you have `~/go/bin` in your $PATH and you have [Glide](https://github.com/Masterminds/glide)
+you have `~/go/bin` in your $PATH and you have [Dep](https://golang.github.io/dep/)
 installed as well.
 
 ## Building from source

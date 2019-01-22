@@ -8,6 +8,7 @@ pipeline {
 		 }
 	}
 	environment {
+		DEP_RELEASE_TAG = 'v0.5.0'
 		GOBIN = '/usr/local/bin'
 		DEBIAN_FRONTEND = 'noninteractive'
 	}
@@ -15,7 +16,7 @@ pipeline {
 		stage('Bootstrap') {
 			steps {
 				echo 'Bootstrapping..'
-				sh 'curl -sSL https://raw.githubusercontent.com/golang/dep/master/install.sh | sh'
+				sh 'curl -sSL -o $GOBIN/dep https://github.com/golang/dep/releases/download/$DEP_RELEASE_TAG/dep-linux-amd64 && chmod 755 $GOBIN/dep'
 				sh 'go get -v github.com/golang/lint/golint'
 				sh 'go get -v github.com/tebeka/go2xunit'
 				sh 'go get -v github.com/axw/gocov/...'
