@@ -23,6 +23,7 @@ pipeline {
 				sh 'go get -v github.com/AlekSi/gocov-xml'
 				sh 'go get -v github.com/wadey/gocovmerge'
 				sh 'apt-get update && apt-get install -y build-essential'
+				sh 'go version'
 			}
 		}
 		stage('Lint') {
