@@ -226,7 +226,7 @@ func (s *Server) Serve(ctx context.Context) error {
 	// Close plugins.
 	for _, p := range s.plugins {
 		if closeErr := p.Close(); closeErr != nil {
-			logger.WithError(err).Debugln("failed to close plugin %T: %v", p, closeErr)
+			logger.WithError(err).Debugf("failed to close plugin %T: %v", p, closeErr)
 		}
 	}
 
