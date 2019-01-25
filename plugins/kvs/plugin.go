@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -41,6 +42,8 @@ var pluginInfo = &plugins.InfoV1{
 	Version:   version.Version,
 	BuildDate: version.BuildDate,
 }
+
+var scopesRequired = []string{"kopano/kvs"}
 
 // KVSPlugin implements a key value store for Kopano API.
 type KVSPlugin struct {
@@ -99,6 +102,12 @@ func (p *KVSPlugin) Initialize(ctx context.Context, errCh chan<- error, srv plug
 		p.srv.Logger().Warnln("kvs: CORS support enabled")
 		p.cors = cors.AllowAll()
 	}
+
+	scopesRequiredString := os.Getenv("KOPANO_KVS_REQUIRED_SCOPES")
+	if scopesRequiredString != "" {
+		scopesRequired = strings.Split(scopesRequiredString, " ")
+	}
+	p.srv.Logger().WithField("required_scopes", scopesRequired).Infoln("kvs: access requirements set up")
 
 	srv.Logger().Debugln("kvs: initialize")
 	return nil

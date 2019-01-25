@@ -32,7 +32,7 @@ const (
 func (p *KVSPlugin) addRoutes(ctx context.Context, router *mux.Router) http.Handler {
 	v1 := router.PathPrefix(httpBaseURL).Subrouter()
 
-	v1.PathPrefix("/kv/user/").Handler(http.StripPrefix(httpBaseURL+"kv/user/", p.srv.AccessTokenRequired(p.MakeHTTPUserKVHandler(v1), nil)))
+	v1.PathPrefix("/kv/user/").Handler(http.StripPrefix(httpBaseURL+"kv/user/", p.srv.AccessTokenRequired(p.MakeHTTPUserKVHandler(v1), scopesRequired)))
 
 	return router
 }
