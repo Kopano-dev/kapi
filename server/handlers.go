@@ -82,7 +82,7 @@ func (s *Server) AccessTokenRequired(next http.Handler, requiredScopes []string)
 		}
 
 		if err != nil {
-			s.logger.WithError(err).Debugln("access token required")
+			s.logger.WithError(err).WithField("url", req.RequestURI).Debugln("access denied")
 			http.Error(rw, "", http.StatusForbidden)
 			return
 		}
