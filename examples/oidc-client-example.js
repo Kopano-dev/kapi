@@ -266,7 +266,7 @@ window.app = new Vue({
 				client_id: this.clientID,
 				redirect_uri: callbackURI,
 				response_type: 'id_token token',
-				scope: 'openid profile email kopano/gc',
+				scope: 'openid profile email kopano/gc kopano/pubs',
 				loadUserInfo: true,
 				silent_redirect_uri: qualifyURL('./oidc-silent-refresh.html'),
 				accessTokenExpiringNotificationTime: 120,

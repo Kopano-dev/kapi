@@ -54,7 +54,7 @@ var pluginInfo = &plugins.InfoV1{
 	BuildDate: version.BuildDate,
 }
 
-var scopesRequired = []string{"kopano/gc"}
+var scopesRequired = []string{"kopano/pubs"}
 
 // PubsPlugin implements a flexible Webhook system providing a RESTful API
 // to register hooks and a Websocket API for efficient receival.
