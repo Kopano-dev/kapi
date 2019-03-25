@@ -1,6 +1,6 @@
 # Kopano API kvs plugin
 
-The kvs plugin privides a key/value store system HTTP API to store data
+The kvs plugin provides a key/value store system HTTP API to store data
 persistently.
 
 In its current state, the kv store can only store documents with size up to

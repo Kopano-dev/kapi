@@ -45,8 +45,9 @@ parameter is mandatory.
 
 ## Plugins
 
-Kopano API supports plugins. Plugins can be used to extend HTTP routes served
-by Kopano API. A example plugin can be found in `plugins/example-plugin`.
+Kopano API supports plugins to its behavior and ships with a bunch of
+plugins to provide API endpoints from various data sources and different
+purposes. A example plugin can be found in `plugins/example-plugin`.
 
 ### grapi: Kopano Groupware REST plugin
 
