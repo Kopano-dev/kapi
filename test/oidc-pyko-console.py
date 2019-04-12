@@ -34,7 +34,7 @@ def main(server_socket=None, access_token=None):
     if access_token:
         try:
             server = helper.getServer()
-            helper.defines.set("server", server)
+            helper.defines["server"] = server
         except:
             traceback.print_exc()
 
