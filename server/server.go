@@ -20,7 +20,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -55,11 +54,26 @@ type Server struct {
 
 // NewServer creates a new Server with the provided parameters.
 func NewServer(listenAddr string, pluginsPath string, iss *url.URL, enabledPlugins map[string]bool, logger logrus.FieldLogger, client *http.Client) (*Server, error) {
+	var err error
+
 	if client == nil {
 		client = http.DefaultClient
 	}
 
-	provider, err := kcoidc.NewProvider(client, log.New(os.Stderr, "kcoidc: ", log.LstdFlags), os.Getenv("KCOIDC_DEBUG") == "1")
+	var kcoidcLogger *debugLogger
+	kcoidcDebug := os.Getenv("KCOIDC_DEBUG") == "1"
+	if kcoidcDebug && logger != nil {
+		kcoidcLogger = &debugLogger{
+			logger: logger,
+			prefix: "kcoidc debug ",
+		}
+	}
+	var provider *kcoidc.Provider
+	if kcoidcLogger != nil {
+		provider, err = kcoidc.NewProvider(client, kcoidcLogger, kcoidcDebug)
+	} else {
+		provider, err = kcoidc.NewProvider(client, nil, kcoidcDebug)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to create kcoidc provider for server: %v", err)
 	}
