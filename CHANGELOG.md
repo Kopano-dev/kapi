@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+
+
+## v0.10.0 (2019-05-17)
+
+- Use correct Dep tag
+- Use updated golint
+- Build with Go 1.12 and Dep 0.5.2
 - Update libkcoidc to 0.6.0 and use its new flexible logger
 - Improve access token python example
 - Fixup python syntax
