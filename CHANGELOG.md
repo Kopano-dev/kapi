@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Update libkcoidc to 0.6.0 and use its new flexible logger
 - Improve access token python example
 - Fixup python syntax
 - Add OAuth2 python3 example
