@@ -34,6 +34,12 @@ import (
 	"stash.kopano.io/kc/kapi/server"
 )
 
+// Defaults.
+const (
+	defaultListenAddr  = "127.0.0.1:8039"
+	defaultPluginsPath = "./plugins"
+)
+
 func commandServe() *cobra.Command {
 	serveCmd := &cobra.Command{
 		Use:   "serve [...args]",
@@ -45,8 +51,8 @@ func commandServe() *cobra.Command {
 			}
 		},
 	}
-	serveCmd.Flags().String("listen", "127.0.0.1:8039", "TCP listen address")
-	serveCmd.Flags().String("plugins-path", "./plugins", "Directory where to find plugin .so files")
+	serveCmd.Flags().String("listen", defaultListenAddr, "TCP listen address")
+	serveCmd.Flags().String("plugins-path", defaultPluginsPath, "Directory where to find plugin .so files")
 	serveCmd.Flags().String("plugins", "", "Enabled plugin IDs. When empty, all found plugins are enabled. Seperate multiple IDs with comma.")
 	serveCmd.Flags().String("iss", "", "OIDC issuer URL")
 	serveCmd.Flags().Bool("insecure", false, "Disable TLS certificate and hostname validation")
