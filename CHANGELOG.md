@@ -4,6 +4,11 @@
 
 
 
+## v0.11.0 (2019-07-09)
+
+- Add healthcheck sub command
+
+
 ## v0.10.0 (2019-05-17)
 
 - Use correct Dep tag
