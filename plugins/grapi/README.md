@@ -24,7 +24,17 @@ origin.
 
 `KOPANO_GRAPI_REQUIRED_SCOPES` is an environment variable which defines the
 required access token scopes to grant access to the API endpoints provided by
-this plugin. By default the scopes `profile, email, kopano/gc`.
+this plugin. By default the scopes are `profile, email, kopano/gc`.
+
+## HTTP API v1
+
+The base URL to this API is `/api/gc/v1`. All example URLs are sub paths of
+this base URL.
+
+### Authentication
+
+All endpoints of the grapi API require [OAuth2 Bearer authentication](https://tools.ietf.org/html/rfc6750#section-2.1) with an access
+token (if not stated otherwise).
 
 ## Debugging
 

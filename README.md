@@ -62,10 +62,16 @@ be used as upstream proxy paths for the subscription socket API.
 
 ### pubs: Kopano Pubsub and Webhook plugin
 
-Kopano API includes a pub/sub system and webhooko system via the Pubs plugin. To
+Kopano API includes a pub/sub system and webhook system via the Pubs plugin. To
 specify the cryptographic secret for the Pubs plugin use the environment
 variable `KOPANO_PUBS_SECRET_KEY`. For more information on the Pubs plugin look
 at 'plugins/pubs/README.md'.
+
+### kvs: Kopano Key Value Store plugin
+
+Kopano API inclues a key value store via the kvs plugin. This plugin needs
+configuration for its persistent storage layer. Look at 'plugins/kvs/README.md'
+for more information.
 
 ## Run unit tests
 

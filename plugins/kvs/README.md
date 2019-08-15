@@ -29,6 +29,10 @@ enables CORS (Cross Origin Resource Sharing) HTTP requests and headers so that
 the REST endpoints provided by this plugin can be used from a browser cross
 origin.
 
+`KOPANO_KVS_REQUIRED_SCOPES` is an environment variable which defines the
+required access token scopes to grant access to the API endpoints provided by
+this plugin. By default the scopes are `kopano/kvs`.
+
 ## HTTP API v1
 
 The base URL to this API is `/api/kvs/v1`. All example URLs are sub paths of
