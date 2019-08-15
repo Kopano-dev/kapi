@@ -1,5 +1,39 @@
 # Source me :)
 
+# Simple script to enrich the shell environment with a Kopano Konnect access
+# token and id tokens from an refresh token which already is in the environment.
+#
+# It works best with a local .auth file which is an file containing a bunch of
+# environment variables and is sourced before running this script. It looks like
+# this:
+#
+#  ````
+#  export ISS=https://your-kopano.local
+#  export CLIENT_ID=my-client-id
+#  export REFRESH_TOKEN_VALUE=replace-with-refresh-token-value
+#  ````
+#
+# If you do not have a local .auth file or a REFRESH_TOKEN yet, check the
+# `get-access-token.py` script. Remember to request the `offline_access` scope
+# to get an refresh token.
+#
+# Runtime dependencies:
+#  - curl
+#  - jq
+#
+# Environment variables supported:
+#
+#  ISS            : OpenID Connect Identifier
+#  CLIENT_ID      : Client ID as known to the OpenID Connect Identifier
+#  REFRESH_TOKEN  : Refresh Token from the OpenID Connect Identifier
+#
+# Note that the REFRESH_TOKEN must be issues must have a matching for the
+# CLIENT_ID value.
+#
+# You can use the `curl.sh` or `oidc-pyko-console.py` scripts to make use of the
+# TOKEN_VALUE exported by this script and to access Kopano services protected by
+# access token.
+
 if [ -z "$ISS" ]; then
     echo "No \$ISS - check your env"
     return

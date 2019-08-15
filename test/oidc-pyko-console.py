@@ -1,12 +1,22 @@
 #!/usr/bin/python3
 """
-Simple interactive Python Kopano console which automatically signs into
-Kopano with OIDC.
+Simple interactive Python Kopano console which signs into Kopano with OIDC.
 
-Usage: KOPANO_SOCKET=default: TOKEN_VALUE=$TOKEN_VALUE ./oidc-pyko-console.py"
+Usage: KOPANO_SOCKET=default: TOKEN_VALUE=$TOKEN_VALUE ./oidc-pyko-console.py
+
+Environment variables supported:
 
   KOPANO_SOCKET : Socket to Kopano server, can be unix, http or https.
   TOKEN_VALUE   : Kopano Konnect Access Token.
+
+Use the `keep-access-token.sh` script as a helper to get a TOKEN_VALUE into
+your local environment automatically.
+
+Runtime Python dependencies:
+
+ - Python 3
+ - readline (optional)
+ - kopano
 
 """
 

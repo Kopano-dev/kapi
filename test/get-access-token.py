@@ -2,9 +2,13 @@
 """
 Simple example how to get OAuth2 credentials from the commandline.
 
+For this script to work, the OpenID Connect Identifier must accept the CLIENT_ID
+and CLIENT_SECRET. This script must be registered as a `native` appplication to
+allow the local redirect callback to work.
+
 Usage: ISS=https://your-kopano.local SCOPE="openid kopano/gc" \
-         CLIENT_ID=your-client-id CLIENT_SECRET=your-client-secret \
-         ./get-access-token.py --output .auth --format json
+         CLIENT_ID=my-client-id CLIENT_SECRET=my-client-secret \
+         ./get-access-token.py --format env
 
   See `./get-access-token.py --help for further usage infos.
 
@@ -18,14 +22,17 @@ Environment variables supported:
 
   INSECURE=1    : Disables TLS validation.
 
+Runtime Python dependencies:
+
+ - Python 3
+ - requests
+ - requests_oauthlib
+
 """
 
 import codecs
-import http
-import httplib2
 import json
 import os
-import urllib.parse
 import queue
 import threading
 import sys
