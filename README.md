@@ -3,7 +3,7 @@
 Kopano API provides a web service with the endpoints to interface with Kopano
 via HTTP APIs.
 
-## TL;DW
+## Build dependencies
 
 Make sure you have Go 1.8 or later installed. This assumes your GOPATH is `~/go` and
 you have `~/go/bin` in your $PATH and you have [Dep](https://golang.github.io/dep/)
@@ -62,16 +62,17 @@ be used as upstream proxy paths for the subscription socket API.
 
 ### pubs: Kopano Pubsub and Webhook plugin
 
-Kopano API includes a pub/sub system and webhook system via the Pubs plugin. To
-specify the cryptographic secret for the Pubs plugin use the environment
-variable `KOPANO_PUBS_SECRET_KEY`. For more information on the Pubs plugin look
-at 'plugins/pubs/README.md'.
+Kopano API includes a pub/sub system and webhook system via the Pubs plugin,
+routed to the `/api/pubs` URL routing prefix. To specify the cryptographic
+secret for the Pubs plugin use the environment variable
+`KOPANO_PUBS_SECRET_KEY`. For more information on the Pubs plugin look at
+'plugins/pubs/README.md'.
 
 ### kvs: Kopano Key Value Store plugin
 
-Kopano API inclues a key value store via the kvs plugin. This plugin needs
-configuration for its persistent storage layer. Look at 'plugins/kvs/README.md'
-for more information.
+Kopano API inclues a key value store via the kvs plugin, routed to the
+`/api/kvs` URL routing prefix. Kvs plugin needs configuration for its persistent
+storage layer. Look at 'plugins/kvs/README.md' for more information.
 
 ## Run unit tests
 
@@ -79,3 +80,18 @@ for more information.
 cd ~/go/src/stash.kopano.io/kc/kapi
 make test
 ```
+
+## Testing the Kopano API
+
+To test, some prerequisites are needed. A full fledged setup with TLS web server,
+authentication provider and backend is strongly suggested. An quick way to set
+this up is using a [Kopano Docker environment](https://github.com/kopano-dev/kopano-docker) which
+provides:
+
+  - TLS web server with [Kopano Web](https://stash.kopano.io/projects/KGOL/repos/kweb),
+  - Authentication with [Kopanp Konnect](https://stash.kopano.io/projects/KC/repos/konnect)
+  - Backend with [Kopano Groupware](https://stash.kopano.io/projects/KC/repos/kopanocore)
+
+Once you have all the bits in place and set up correctly, look at the `test`
+folder in this project for a bunch of scripts and helpers to simplify testing
+and give you ideas how to access the APIs provided by kapi.
