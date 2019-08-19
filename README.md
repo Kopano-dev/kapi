@@ -49,16 +49,16 @@ Kopano API supports plugins to its behavior and ships with a bunch of
 plugins to provide API endpoints from various data sources and different
 purposes. A example plugin can be found in `plugins/example-plugin`.
 
-### grapi: Kopano Groupware REST plugin
+### grapi: Kopano Groupware REST plugin (GRAPI)
 
 Kopano API includes the plugin for Kopano Groupware REST. This plugin provides
 access to Kopano Groupware RESTful API via `/api/gc/` URL routing prefix.
 
-To specify where the Grapi plugin can find its required backend sockets, specify
-the `KOPANO_GRAPI_SOCKETS` environment variable to point to the base directory
-location. All `rest*.sock` files in that directory will be used as upstream
-proxy paths for the REST api and all `notify*.sock` files in that directory will
-be used as upstream proxy paths for the subscription socket API.
+To specify where the grapi plugin can find its required GRAPI backend sockets,
+specify the `KOPANO_GRAPI_SOCKETS` environment variable to point to the base
+directory location. All `rest*.sock` files in that directory will be used as
+upstream proxy paths for the REST api and all `notify*.sock` files in that
+directory will be used as upstream proxy paths for the subscription socket API.
 
 ### pubs: Kopano Pubsub and Webhook plugin
 
@@ -90,7 +90,7 @@ provides:
 
   - TLS web server with [Kopano Web](https://stash.kopano.io/projects/KGOL/repos/kweb),
   - Authentication with [Kopanp Konnect](https://stash.kopano.io/projects/KC/repos/konnect)
-  - Backend with [Kopano Groupware](https://stash.kopano.io/projects/KC/repos/kopanocore)
+  - Backend with [GRAPI](https://stash.kopano.io/projects/KC/repos/grapi) and [Kopano Groupware](https://stash.kopano.io/projects/KC/repos/kopanocore)
 
 Once you have all the bits in place and set up correctly, look at the `test`
 folder in this project for a bunch of scripts and helpers to simplify testing
