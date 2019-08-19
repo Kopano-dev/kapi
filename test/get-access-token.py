@@ -229,13 +229,16 @@ if __name__ == "__main__":
             if flags.format == "json":
                 print(json.dumps(token, indent=2, sort_keys=True), file=output)
             elif flags.format == "env":
-                print("ACCESS_TOKEN_VALUE={}".format(token["access_token"]), file=output)
+                print("TOKEN_VALUE={}".format(token["access_token"]), file=output)
                 print("EXPIRES_AT={}".format(token["expires_at"]), file=output)
                 print("EXPIRES_IN={}".format(token["expires_in"]), file=output)
                 print("TOKEN_TYPE={}".format(token["token_type"]), file=output)
                 rt = token.get("refresh_token")
                 if rt:
-                    print("REFRESH_TOKEN_VALUE : {}".format(rt), file=output)
+                    print("REFRESH_TOKEN_VALUE={}".format(rt), file=output)
+                it = token.get("id_token")
+                if it:
+                    print("ID_TOKEN_VALUE={}".format(it), file=output)
             else:
                 raise ValueError("unknown output format", flags.format)
         finally:
