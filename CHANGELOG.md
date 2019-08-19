@@ -2,9 +2,13 @@
 
 ## Unreleased
 
+- Unify env variable names of test scripts
+- Update README
+- Add instructions to example scripts
+- Update plugin docs with additional details where those were missing
 
 
-## v0.11.0 (2019-07-09)
+## v0.11.0 (2019-07-26)
 
 - Add healthcheck sub command
 
