@@ -25,3 +25,13 @@ import (
 type HTTPProxyHandler interface {
 	ServeHTTP(rw http.ResponseWriter, req *http.Request) (int, error)
 }
+
+// The HTTPProxyHandlerFunc type is an adapter to allow the use of ordinary
+// functions as HTTP oroxy handler. If f is with the appropriate signature,
+// HTTPProxyHandlerFunc(f) is a HTTPProxyHandler that calls f.
+type HTTPProxyHandlerFunc func(http.ResponseWriter, *http.Request) (int, error)
+
+// ServeHTTP calls f(rw, req)
+func (f HTTPProxyHandlerFunc) ServeHTTP(rw http.ResponseWriter, req *http.Request) (int, error) {
+	return f(rw, req)
+}

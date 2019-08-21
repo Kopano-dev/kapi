@@ -40,6 +40,8 @@ func (p *KopanoGroupwareCorePlugin) injectAuthIntoRequestHeaders(req *http.Reque
 			} else {
 				err = errors.New("missing kc.identity with username")
 			}
+		} else {
+			req.Header.Del(usernameRequestHeaderName)
 		}
 		req.Header.Set(entryIDRequestHeaderName, authenticatedUserID)
 	} else {

@@ -59,6 +59,7 @@ type Configuration struct {
 	Keepalive   uint
 	TryDuration time.Duration
 	TryInterval time.Duration
+	Sticky      string
 	Extra       []string
 }
 
@@ -76,6 +77,19 @@ var DefaultConfiguration = &Configuration{
 type configurationWithUpstreams struct {
 	UpstreamURIs []string
 	C            *Configuration
+}
+
+func makeProxyHandler(configuration *Configuration, next proxy.HTTPProxyHandler) (proxy.HTTPProxyHandler, error) {
+	if configuration.Sticky == "" {
+		return next, nil
+	}
+
+	handler, err := newStickyProxyHandler(configuration.Sticky)
+	if err != nil {
+		return nil, err
+	}
+
+	return handler.Handler(next), nil
 }
 
 // New creates a new proxy identified by the provided name to the provided
@@ -106,5 +120,5 @@ func New(name string, upstreamURIs []string, configuration *Configuration) (prox
 		Upstreams: upstreams,
 	}
 
-	return proxy, nil
+	return makeProxyHandler(configuration, proxy)
 }

@@ -30,20 +30,21 @@ import (
 	"stash.kopano.io/kc/kapi/proxy/httpproxy"
 )
 
+const (
+	entryIDRequestHeaderName  = "X-Kopano-UserEntryID"
+	usernameRequestHeaderName = "X-Kopano-Username"
+)
+
 var restProxyConfiguration = &httpproxy.Configuration{
-	Policy:      "least_conn",
+	Policy:      "header " + entryIDRequestHeaderName,
 	FailTimeout: 500 * time.Millisecond,
 	MaxFails:    1,
 	MaxConns:    0,
 	Keepalive:   100,
 	TryDuration: 1 * time.Second,
 	TryInterval: 50 * time.Millisecond,
+	Sticky:      "nocache",
 }
-
-const (
-	entryIDRequestHeaderName  = "X-Kopano-UserEntryID"
-	usernameRequestHeaderName = "X-Kopano-Username"
-)
 
 func (p *KopanoGroupwareCorePlugin) initializeProxy(ctx context.Context, socketPath string, pattern string) (proxy.HTTPProxyHandler, error) {
 	p.srv.Logger().Debugf("grapi: looking for proxy %s files in %s", pattern, socketPath)
