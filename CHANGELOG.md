@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+
+
+## v0.12.0 (2019-08-21)
+
+- Use sticky backend selection for grapi
+- Add GRAPI link to top level README
+- Add more GRAPI information to README
 - Unify env variable names of test scripts
 - Update README
 - Add instructions to example scripts
