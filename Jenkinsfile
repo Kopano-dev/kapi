@@ -3,7 +3,7 @@
 pipeline {
 	agent {
 		docker {
-			image 'golang:1.12'
+			image 'golang:1.12-stretch' // Ensure to use old glibc, to be compatible to Debian 9
 			args '-u 0'
 		 }
 	}
