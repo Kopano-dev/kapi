@@ -4,7 +4,13 @@
 
 
 
-## v0.12.0 (2019-08-21)
+## v0.12.1 (2019-08-26)
+
+- Update Go Dep to 0.5.4
+- Compile on stretch to ensure compatibility
+
+
+## v0.12.0 (2019-08-22)
 
 - Use sticky backend selection for grapi
 - Add GRAPI link to top level README
