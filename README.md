@@ -1,7 +1,12 @@
 # Kopano API
 
 Kopano API provides a web service with the endpoints to interface with Kopano
-via HTTP APIs.
+via HTTP APIs. The availablity of APIS is controlled by plugins. See the [Plugins](#Plugins)
+section below for details.
+
+# Technologies
+
+- Go
 
 ## Build dependencies
 
@@ -47,7 +52,7 @@ parameter is mandatory.
 
 Kopano API supports plugins to its behavior and ships with a bunch of
 plugins to provide API endpoints from various data sources and different
-purposes. A example plugin can be found in `plugins/example-plugin`.
+purposes. An example plugin can be found in `plugins/example-plugin`.
 
 ### grapi: Kopano Groupware REST plugin (GRAPI)
 
@@ -60,6 +65,8 @@ directory location. All `rest*.sock` files in that directory will be used as
 upstream proxy paths for the REST api and all `notify*.sock` files in that
 directory will be used as upstream proxy paths for the subscription socket API.
 
+See the [grapi plugin README](https://stash.kopano.io/projects/KC/repos/kapi/browse/plugins/grapi/README.md) for further details.
+
 ### pubs: Kopano Pubsub and Webhook plugin
 
 Kopano API includes a pub/sub system and webhook system via the Pubs plugin,
@@ -68,11 +75,15 @@ secret for the Pubs plugin use the environment variable
 `KOPANO_PUBS_SECRET_KEY`. For more information on the Pubs plugin look at
 'plugins/pubs/README.md'.
 
+See the [pubs plugin README](https://stash.kopano.io/projects/KC/repos/kapi/browse/plugins/pubs/README.md) for further details.
+
 ### kvs: Kopano Key Value Store plugin
 
 Kopano API inclues a key value store via the kvs plugin, routed to the
 `/api/kvs` URL routing prefix. Kvs plugin needs configuration for its persistent
 storage layer. Look at 'plugins/kvs/README.md' for more information.
+
+See the [kvs plugin README](https://stash.kopano.io/projects/KC/repos/kapi/browse/plugins/kvs/README.md) for further details.
 
 ## Run unit tests
 
