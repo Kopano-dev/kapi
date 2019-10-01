@@ -4,6 +4,14 @@
 
 
 
+## v0.13.0 (2019-10-01)
+
+- Build with Go 1.13
+- Add basic metrics
+- Ensure BASE folder in fmt and check targets
+- Improve README
+
+
 ## v0.12.2 (2019-09-30)
 
 - Rebuild with Go 1.12.10
