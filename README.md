@@ -100,7 +100,7 @@ this up is using a [Kopano Docker environment](https://github.com/kopano-dev/kop
 provides:
 
   - TLS web server with [Kopano Web](https://stash.kopano.io/projects/KGOL/repos/kweb),
-  - Authentication with [Kopanp Konnect](https://stash.kopano.io/projects/KC/repos/konnect)
+  - Authentication with [Kopano Konnect](https://stash.kopano.io/projects/KC/repos/konnect)
   - Backend with [GRAPI](https://stash.kopano.io/projects/KC/repos/grapi) and [Kopano Groupware](https://stash.kopano.io/projects/KC/repos/kopanocore)
 
 Once you have all the bits in place and set up correctly, look at the `test`
