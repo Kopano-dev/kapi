@@ -4,6 +4,12 @@
 
 
 
+## v0.13.1 (2019-10-25)
+
+- Build with Go 1.13.3
+- Fix typo on README
+
+
 ## v0.13.0 (2019-10-01)
 
 - Build with Go 1.13
