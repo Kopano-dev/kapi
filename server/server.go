@@ -91,9 +91,11 @@ func NewServer(listenAddr string, pluginsPath string, iss *url.URL, enabledPlugi
 		requestLog: os.Getenv("KOPANO_DEBUG_SERVER_REQUEST_LOG") == "1",
 	}
 
-	err = s.loadPlugins(enabledPlugins)
-	if err != nil {
-		return s, err
+	if enabledPlugins != nil {
+		err = s.loadPlugins(enabledPlugins)
+		if err != nil {
+			return s, err
+		}
 	}
 
 	return s, nil
