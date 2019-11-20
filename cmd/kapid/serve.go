@@ -93,14 +93,17 @@ func serve(cmd *cobra.Command, args []string) error {
 	}
 	logger.Infof("loading plugins from %s", pluginsPath)
 
-	var enabledPlugins map[string]bool
+	var enabledPlugins []string
 	if pluginsString, err := cmd.Flags().GetString("plugins"); err == nil && pluginsString != "" {
-		enabledPlugins = make(map[string]bool)
 		for _, id := range strings.Split(pluginsString, ",") {
-			enabledPlugins[strings.TrimSpace(id)] = true
+			enabledPlugins = append(enabledPlugins, strings.TrimSpace(id))
 		}
 	}
-	logger.Debugf("enabled plugins: %#v", enabledPlugins)
+	if len(enabledPlugins) > 0 {
+		logger.Debugf("enabled plugins: %v", enabledPlugins)
+	} else {
+		logger.Debug("all plugins enabled")
+	}
 
 	var iss *url.URL
 	if issString, err := cmd.Flags().GetString("iss"); err == nil && issString != "" {

@@ -26,6 +26,12 @@ import (
 	"stash.kopano.io/kc/kapi/proxy"
 )
 
+// Plugin is the base interface for plugins.
+type Plugin interface {
+	ServeHTTP(rw http.ResponseWriter, req *http.Request) (bool, error)
+	Close() error
+}
+
 // RegisterPluginV1 is the register function plugins needs to expose as Register
 // to be recognized to implement PluginV1.
 type RegisterPluginV1 func() PluginV1
@@ -33,10 +39,9 @@ type RegisterPluginV1 func() PluginV1
 // PluginV1 is the interface a plugin needs to implement to be registered as
 // a plugin.
 type PluginV1 interface {
+	Plugin
 	Info() *InfoV1
 	Initialize(ctx context.Context, errCh chan<- error, srv ServerV1) error
-	Close() error
-	ServeHTTP(rw http.ResponseWriter, req *http.Request) (bool, error)
 }
 
 // ServerV1 is the interface how a plugin can integrate calls provided by

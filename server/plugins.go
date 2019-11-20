@@ -29,7 +29,7 @@ import (
 	"stash.kopano.io/kc/kapi/plugins"
 )
 
-func (s *Server) loadPlugins() error {
+func (s *Server) loadPlugins(enabledPlugins []string) error {
 	if s.pluginsPath == "" {
 		return nil
 	}
@@ -38,29 +38,66 @@ func (s *Server) loadPlugins() error {
 		return fmt.Errorf("plugin directory does not exist or is not directory")
 	}
 
-	err := filepath.Walk(s.pluginsPath, s.loadPlugin)
+	var enabledPluginsMap map[string]bool
+	if len(enabledPlugins) > 0 {
+		enabledPluginsMap = make(map[string]bool)
+		for _, id := range enabledPlugins {
+			enabledPluginsMap[id] = true
+		}
+	}
+
+	loadedPlugins := make(map[string]plugins.Plugin)
+	err := filepath.Walk(s.pluginsPath, func(path string, fp os.FileInfo, _ error) error {
+		id, p := s.loadPlugin(path, fp)
+		if id == "" || p == nil {
+			return nil
+		}
+
+		if enabledPluginsMap != nil {
+			if !enabledPluginsMap[id] {
+				// Skip plugin when not enabled.
+				s.logger.WithField("plugin", id).Debugf("plugin not enabled, skipped: %s", path)
+				return nil
+			}
+		} else {
+			// Auto enable plugin when none is explicitly enabled.
+			enabledPlugins = append(enabledPlugins, id)
+		}
+
+		loadedPlugins[id] = p
+		return nil
+	})
 	if err != nil {
 		return err
+	}
+
+	for _, id := range enabledPlugins {
+		if p, ok := loadedPlugins[id]; ok {
+			s.plugins = append(s.plugins, p)
+			s.logger.WithField("plugin", id).Infoln("plugin registered")
+		} else {
+			s.logger.WithField("plugin", id).Warnln("plugin not found")
+		}
 	}
 
 	return nil
 }
 
-func (s *Server) loadPlugin(path string, fp os.FileInfo, _ error) error {
+func (s *Server) loadPlugin(path string, fp os.FileInfo) (string, plugins.Plugin) {
 	if fp.IsDir() {
-		return nil
+		return "", nil
 	}
 
 	// NOTE(longsleep): Allow try only files which contain .so. This includes
 	// for example `plugin.so` and also `plugin.so.1`.
 	if !strings.Contains(fp.Name(), ".so") {
-		return nil
+		return "", nil
 	}
 
 	p, err := plugin.Open(path)
 	if err != nil {
-		s.logger.WithError(err).Debugf("invalid plugin: %s", path)
-		return nil
+		s.logger.WithError(err).Debugf("plugin invalid: %s", path)
+		return "", nil
 	}
 
 	if registerLookup, err := p.Lookup("Register"); err == nil {
@@ -69,27 +106,21 @@ func (s *Server) loadPlugin(path string, fp os.FileInfo, _ error) error {
 
 			info := p.Info()
 			if info.ID == "" {
-				s.logger.Warnf("skipping plugin without ID: %s", path)
-				return nil
+				s.logger.Warnf("plugin without ID, skipped: %s", path)
+				return "", nil
 			}
-			if s.enabledPlugins != nil && s.enabledPlugins[info.ID] != true {
-				// Skip plugin when not enabled.
-				s.logger.WithField("plugin", info.ID).Debugf("skipping not enabled plugin: %s", path)
-				return nil
-			}
-
-			s.plugins = append(s.plugins, p)
 			s.logger.WithFields(logrus.Fields{
 				"plugin":  info.ID,
 				"version": info.Version,
 				"build":   info.BuildDate,
-			}).Infof("registered plugin: %s", path)
+			}).Infof("plugin loaded: %s", path)
+			return info.ID, p
 		} else {
-			s.logger.Warnf("unknown plugin type %#v: %s", registerLookup, path)
+			s.logger.Warnf("plugin type %#v unknown: %s", registerLookup, path)
 		}
 	} else {
-		s.logger.WithError(err).Debugf("invalid plugin implementation: %s", path)
+		s.logger.WithError(err).Debugf("plugin implementation invalid: %s", path)
 	}
 
-	return nil
+	return "", nil
 }

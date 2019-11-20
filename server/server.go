@@ -43,8 +43,7 @@ type Server struct {
 	logger      logrus.FieldLogger
 	client      *http.Client
 
-	plugins        []plugins.PluginV1
-	enabledPlugins map[string]bool
+	plugins []plugins.Plugin
 
 	iss      *url.URL
 	provider *kcoidc.Provider
@@ -53,7 +52,7 @@ type Server struct {
 }
 
 // NewServer creates a new Server with the provided parameters.
-func NewServer(listenAddr string, pluginsPath string, iss *url.URL, enabledPlugins map[string]bool, logger logrus.FieldLogger, client *http.Client) (*Server, error) {
+func NewServer(listenAddr string, pluginsPath string, iss *url.URL, enabledPlugins []string, logger logrus.FieldLogger, client *http.Client) (*Server, error) {
 	var err error
 
 	if client == nil {
@@ -79,11 +78,12 @@ func NewServer(listenAddr string, pluginsPath string, iss *url.URL, enabledPlugi
 	}
 
 	s := &Server{
-		listenAddr:     listenAddr,
-		pluginsPath:    pluginsPath,
-		enabledPlugins: enabledPlugins,
-		logger:         logger,
-		client:         client,
+		listenAddr:  listenAddr,
+		pluginsPath: pluginsPath,
+		logger:      logger,
+		client:      client,
+
+		plugins: make([]plugins.Plugin, 0),
 
 		iss:      iss,
 		provider: provider,
@@ -91,7 +91,7 @@ func NewServer(listenAddr string, pluginsPath string, iss *url.URL, enabledPlugi
 		requestLog: os.Getenv("KOPANO_DEBUG_SERVER_REQUEST_LOG") == "1",
 	}
 
-	err = s.loadPlugins()
+	err = s.loadPlugins(enabledPlugins)
 	if err != nil {
 		return s, err
 	}
@@ -179,9 +179,14 @@ func (s *Server) Serve(ctx context.Context) error {
 	signalCh := make(chan os.Signal)
 
 	// Plugins.
-	for _, p := range s.plugins {
-		if pluginErr := p.Initialize(serveCtx, errCh, s); pluginErr != nil {
-			return fmt.Errorf("failed to initialize plugin %T: %v", p, pluginErr)
+	for _, plugin := range s.plugins {
+		switch p := plugin.(type) {
+		case plugins.PluginV1:
+			if pluginErr := p.Initialize(serveCtx, errCh, s); pluginErr != nil {
+				return fmt.Errorf("failed to initialize plugin %T: %v", p, pluginErr)
+			}
+		default:
+			return fmt.Errorf("failed to initialize unknown plugin type %T", p)
 		}
 	}
 
