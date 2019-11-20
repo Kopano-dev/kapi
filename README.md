@@ -1,7 +1,7 @@
 # Kopano API
 
 Kopano API provides a web service with the endpoints to interface with Kopano
-via HTTP APIs. The availablity of APIS is controlled by plugins. See the [Plugins](#Plugins)
+via HTTP APIs. The availability of APIs is controlled by plugins. See the [Plugins](#Plugins)
 section below for details.
 
 # Technologies
@@ -10,18 +10,21 @@ section below for details.
 
 ## Build dependencies
 
-Make sure you have Go 1.8 or later installed. This assumes your GOPATH is `~/go` and
-you have `~/go/bin` in your $PATH and you have [Dep](https://golang.github.io/dep/)
-installed as well.
+Make sure you have Go 1.13 or later installed. This project uses Go modules.
 
 ## Building from source
 
 ```
-mkdir -p ~/go/src/stash.kopano.io/kc
-cd ~/go/src/stash.kopano.io/kc
 git clone <THIS-PROJECT> kapi
-cd kopano-api
+cd kapi
 make
+```
+
+### Build with Docker
+
+```
+docker build -t kapid-builder -f Dockerfile.build .
+docker run -it --rm -u $(id -u):$(id -g) -v $(pwd):/build kapid-builder
 ```
 
 ## Running Kopano API
@@ -39,7 +42,7 @@ Add environment variables as needed by those plugins. See next chapter for
 more information about plugins.
 
 The `--plugins` parameter can be used to select what plugins should be enabled.
-It takes a comma seperated value of plugin IDs as the plugin defined it during
+It takes a comma separated value of plugin IDs as the plugin defined it during
 its build time. If the `--plugins` parameter is empty (the default), all plugins
 found will be activated.
 
@@ -88,7 +91,6 @@ See the [kvs plugin README](https://stash.kopano.io/projects/KC/repos/kapi/brows
 ## Run unit tests
 
 ```
-cd ~/go/src/stash.kopano.io/kc/kapi
 make test
 ```
 

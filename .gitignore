@@ -8,8 +8,6 @@
 __pycache__
 /test/tests.*
 /test/coverage.*
-/golint.txt
-/govet.txt
 /3rdparty-LICENSES.md
 /test/test-env
 /examples/dist
