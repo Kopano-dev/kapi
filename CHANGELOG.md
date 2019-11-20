@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Use Go modules instead of Go dep
 
 
 ## v0.13.2 (2019-11-07)
