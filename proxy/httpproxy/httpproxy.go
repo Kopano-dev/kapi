@@ -22,8 +22,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/mholt/caddy/caddyfile"
-	caddyproxy "github.com/mholt/caddy/caddyhttp/proxy"
+	"github.com/caddyserver/caddy/caddyfile"
+	caddyproxy "github.com/caddyserver/caddy/caddyhttp/proxy"
 
 	"stash.kopano.io/kc/kapi/proxy"
 )
