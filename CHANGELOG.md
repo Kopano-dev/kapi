@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+
+
+## v0.14.0 (2019-11-25)
+
 - Allow to start without any plugin
 - Implement initialization order for plugins
 - Bump linter to v1.21.0
