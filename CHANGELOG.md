@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Allow to start without any plugin
+- Implement initialization order for plugins
+- Bump linter to v1.21.0
+- Update 3rd party modules
+- Add minimal version unit test
 - Use Go modules instead of Go dep
 
 
