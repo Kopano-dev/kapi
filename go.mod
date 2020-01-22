@@ -27,20 +27,17 @@ require (
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/orcaman/concurrent-map v0.0.0-20190826125027-8c72a8bb44f6
 	github.com/prometheus/client_golang v1.2.1
-	github.com/prometheus/procfs v0.0.8 // indirect
 	github.com/rs/cors v1.7.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
-	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/crypto v0.0.0-20191202143827-86a70503ff7e // indirect
 	golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933 // indirect
 	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/mcuadros/go-syslog.v2 v2.3.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
-	gopkg.in/yaml.v2 v2.2.7 // indirect
 	stash.kopano.io/kc/libkcoidc v0.8.1
 	stash.kopano.io/kgol/oidc-go v0.3.1 // indirect
 	stash.kopano.io/kgol/rndm v1.1.0
-	stash.kopano.io/kwm/kwmserver v1.0.1
+	stash.kopano.io/kwm/kwmserver v1.1.0
 )
