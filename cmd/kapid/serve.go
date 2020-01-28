@@ -26,7 +26,6 @@ import (
 	_ "net/http/pprof"
 	"net/url"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -39,8 +38,7 @@ import (
 
 // Defaults.
 const (
-	defaultListenAddr  = "127.0.0.1:8039"
-	defaultPluginsPath = "./plugins"
+	defaultListenAddr = "127.0.0.1:8039"
 )
 
 func commandServe() *cobra.Command {
@@ -55,7 +53,7 @@ func commandServe() *cobra.Command {
 		},
 	}
 	serveCmd.Flags().String("listen", defaultListenAddr, "TCP listen address")
-	serveCmd.Flags().String("plugins-path", defaultPluginsPath, "Directory where to find plugin .so files")
+	serveCmd.Flags().String("plugins-path", "", "Historic unused parameter")
 	serveCmd.Flags().String("plugins", "", "Enabled plugin IDs. When empty, all found plugins are enabled. Seperate multiple IDs with comma.")
 	serveCmd.Flags().String("iss", "", "OIDC issuer URL")
 	serveCmd.Flags().Bool("insecure", false, "Disable TLS certificate and hostname validation")
@@ -81,17 +79,7 @@ func serve(cmd *cobra.Command, args []string) error {
 	}
 	logger.Infoln("serve start")
 
-	var pluginsPath string
-
 	listenAddr, _ := cmd.Flags().GetString("listen")
-
-	if pluginsPathString, err := cmd.Flags().GetString("plugins-path"); err == nil && pluginsPathString != "" {
-		pluginsPath, err = filepath.Abs(pluginsPathString)
-		if err != nil {
-			return fmt.Errorf("invalid plugins-path: %v", err)
-		}
-	}
-	logger.Infof("loading plugins from %s", pluginsPath)
 
 	enabledPlugins := make([]string, 0)
 	if pluginsString, err := cmd.Flags().GetString("plugins"); err == nil && pluginsString != "" {
@@ -162,7 +150,7 @@ func serve(cmd *cobra.Command, args []string) error {
 		}()
 	}
 
-	srv, err := server.NewServer(listenAddr, pluginsPath, iss, enabledPlugins, logger, client)
+	srv, err := server.NewServer(listenAddr, "", iss, enabledPlugins, logger, client)
 	if err != nil {
 		return err
 	}

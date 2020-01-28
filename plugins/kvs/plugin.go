@@ -15,7 +15,7 @@
  *
  */
 
-package main
+package plugin
 
 import (
 	"context"
@@ -134,5 +134,9 @@ var Register plugins.RegisterPluginV1 = func() plugins.PluginV1 {
 	}
 }
 
-// NOTE(longsleep): Keep main() to make the linter happy.
-func main() {}
+func init() {
+	err := plugins.RegisterV1("kvs", Register)
+	if err != nil {
+		panic(err)
+	}
+}

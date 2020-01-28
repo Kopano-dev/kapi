@@ -15,7 +15,7 @@
  *
  */
 
-package main
+package pubs
 
 import (
 	"context"

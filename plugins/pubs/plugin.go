@@ -15,7 +15,7 @@
  *
  */
 
-package main
+package pubs
 
 import (
 	"context"
@@ -196,5 +196,9 @@ var Register plugins.RegisterPluginV1 = func() plugins.PluginV1 {
 	return &PubsPlugin{}
 }
 
-// NOTE(longsleep): Keep main() to make the linter happy.
-func main() {}
+func init() {
+	err := plugins.RegisterV1("pubs", Register)
+	if err != nil {
+		panic(err)
+	}
+}

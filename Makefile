@@ -34,15 +34,14 @@ VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2>/dev/null |
 PKGS     = $(or $(PKG),$(shell $(GO) list -mod=readonly ./... | grep -v "^$(PACKAGE)/vendor/"))
 TESTPKGS = $(shell $(GO) list -mod=readonly -f '{{ if or .TestGoFiles .XTestGoFiles }}{{ .ImportPath }}{{ end }}' $(PKGS) 2>/dev/null)
 CMDS     = $(or $(CMD),$(addprefix cmd/,$(notdir $(shell find "$(PWD)/cmd/" -type d))))
-PLUGINS  = $(or $(PLUGIN),$(addprefix plugins/,$(notdir $(shell find "$(PWD)/plugins/" -maxdepth 1 -type d))))
 TIMEOUT  = 30
 
 # Build
 
 .PHONY: all
-all: fmt | $(CMDS) $(PLUGINS)
+all: fmt | $(CMDS)
 
-plugins: fmt | $(PLUGINS)
+plugins:
 
 .PHONY: $(CMDS)
 $(CMDS): vendor ; $(info building $@ ...) @
@@ -53,16 +52,6 @@ $(CMDS): vendor ; $(info building $@ ...) @
 		-tags release \
 		-ldflags '-s -w -buildid=reproducible/$(VERSION) -X $(PACKAGE)/version.Version=$(VERSION) -X $(PACKAGE)/version.BuildDate=$(DATE)' \
 		-o bin/$(notdir $@) ./$@
-
-.PHONY: $(PLUGINS)
-$(PLUGINS): vendor ; $(info building $@ ...) @
-	CGO_ENABLED=1 $(GO) build \
-		-buildmode plugin \
-		-mod vendor \
-		-trimpath \
-		-tags release \
-		-ldflags '-s -w -buildid=reproducible/$(VERSION) -X $(PACKAGE)/version.Version=$(VERSION) -X $(PACKAGE)/version.BuildDate=$(DATE)' \
-		-o bin/plugins/$(notdir $@).so ./$@
 
 # Helpers
 
@@ -166,7 +155,6 @@ dist: 3rdparty-LICENSES.md ; $(info building dist tarball ...)
 	cp -avf ../README.md "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../3rdparty-LICENSES.md "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../bin/* "${PACKAGE_NAME}-${VERSION}" && \
-	cp -avf ../bin/plugins "${PACKAGE_NAME}-${VERSION}" && \
 	cp -avf ../scripts/kopano-kapid.binscript "${PACKAGE_NAME}-${VERSION}/scripts" && \
 	cp -avf ../scripts/kopano-kapid.service "${PACKAGE_NAME}-${VERSION}/scripts" && \
 	cp -avf ../scripts/kapid.cfg "${PACKAGE_NAME}-${VERSION}/scripts" && \

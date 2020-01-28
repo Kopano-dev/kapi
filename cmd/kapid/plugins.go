@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Kopano and its licensors
+ * Copyright 2020 Kopano and its licensors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License, version 3,
@@ -15,12 +15,11 @@
  *
  */
 
-package plugin
+package main
 
 import (
-	"net/http"
+	// Add plugins here to make them available.
+	_ "stash.kopano.io/kc/kapi/plugins/grapi"
+	_ "stash.kopano.io/kc/kapi/plugins/kvs"
+	_ "stash.kopano.io/kc/kapi/plugins/pubs"
 )
-
-func (p *ExamplePlugin) testHandler(rw http.ResponseWriter, req *http.Request) {
-	rw.WriteHeader(http.StatusTeapot)
-}

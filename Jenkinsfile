@@ -37,7 +37,7 @@ pipeline {
 			steps {
 				echo 'Building..'
 				sh 'make DATE=reproducible'
-				sh './bin/kapid version  && sha256sum ./bin/kapid && sha256sum ./bin/plugins/*.so'
+				sh './bin/kapid version && sha256sum ./bin/kapid'
 			}
 		}
 		stage('Test with coverage') {
