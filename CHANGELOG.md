@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Move plugins directly into daemon binary
+- Update dependencies
+- Update third party dependencies
+- Update dependencies
 
 
 ## v0.14.0 (2019-11-25)
