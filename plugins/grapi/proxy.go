@@ -106,7 +106,7 @@ func (p *KopanoGroupwareCorePlugin) initializeProxy(ctx context.Context, socketP
 
 func (p *KopanoGroupwareCorePlugin) handleDefaultV1(rw http.ResponseWriter, req *http.Request) {
 	p.mutex.RLock()
-	proxy := p.defaultProxy
+	defaultProxy := p.defaultProxy
 	p.mutex.RUnlock()
 
 	// Inject proper auth.
@@ -118,12 +118,12 @@ func (p *KopanoGroupwareCorePlugin) handleDefaultV1(rw http.ResponseWriter, req 
 	}
 
 	// Proxy all.
-	p.srv.HandleWithProxy(proxy, http.HandlerFunc(p.handleNoProxy)).ServeHTTP(rw, req)
+	p.srv.HandleWithProxy(defaultProxy, http.HandlerFunc(p.handleNoProxy)).ServeHTTP(rw, req)
 }
 
 func (p *KopanoGroupwareCorePlugin) handleSubscriptionsV1(rw http.ResponseWriter, req *http.Request) {
 	p.mutex.RLock()
-	proxy := p.subscriptionProxy
+	subscriptionProxy := p.subscriptionProxy
 	p.mutex.RUnlock()
 
 	// Inject proper auth.
@@ -135,7 +135,7 @@ func (p *KopanoGroupwareCorePlugin) handleSubscriptionsV1(rw http.ResponseWriter
 	}
 
 	// Proxy all.
-	p.srv.HandleWithProxy(proxy, http.HandlerFunc(p.handleNoProxy)).ServeHTTP(rw, req)
+	p.srv.HandleWithProxy(subscriptionProxy, http.HandlerFunc(p.handleNoProxy)).ServeHTTP(rw, req)
 }
 
 func (p *KopanoGroupwareCorePlugin) handleNoProxy(rw http.ResponseWriter, req *http.Request) {

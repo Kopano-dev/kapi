@@ -54,7 +54,7 @@ func commandServe() *cobra.Command {
 	}
 	serveCmd.Flags().String("listen", defaultListenAddr, "TCP listen address")
 	serveCmd.Flags().String("plugins-path", "", "Historic unused parameter")
-	serveCmd.Flags().String("plugins", "", "Enabled plugin IDs. When empty, all found plugins are enabled. Seperate multiple IDs with comma.")
+	serveCmd.Flags().String("plugins", "", "Enabled plugin IDs. When empty, all found plugins are enabled. Separate multiple IDs with comma.")
 	serveCmd.Flags().String("iss", "", "OIDC issuer URL")
 	serveCmd.Flags().Bool("insecure", false, "Disable TLS certificate and hostname validation")
 	serveCmd.Flags().Bool("log-timestamp", true, "Prefix each log line with timestamp")
@@ -82,7 +82,7 @@ func serve(cmd *cobra.Command, args []string) error {
 	listenAddr, _ := cmd.Flags().GetString("listen")
 
 	enabledPlugins := make([]string, 0)
-	if pluginsString, err := cmd.Flags().GetString("plugins"); err == nil && pluginsString != "" {
+	if pluginsString, strErr := cmd.Flags().GetString("plugins"); strErr == nil && pluginsString != "" {
 		for _, id := range strings.Split(pluginsString, ",") {
 			if id == "none" {
 				enabledPlugins = nil
@@ -98,10 +98,10 @@ func serve(cmd *cobra.Command, args []string) error {
 	}
 
 	var iss *url.URL
-	if issString, err := cmd.Flags().GetString("iss"); err == nil && issString != "" {
-		iss, err = url.Parse(issString)
-		if err != nil {
-			return fmt.Errorf("invalid iss url: %v", err)
+	if issString, parseErr := cmd.Flags().GetString("iss"); parseErr == nil && issString != "" {
+		iss, parseErr = url.Parse(issString)
+		if parseErr != nil {
+			return fmt.Errorf("invalid iss url: %v", parseErr)
 		}
 	}
 	if iss == nil {
@@ -143,9 +143,9 @@ func serve(cmd *cobra.Command, args []string) error {
 			handler := http.NewServeMux()
 			logger.WithField("listenAddr", metricsListen).Infoln("metrics enabled, starting listener")
 			handler.Handle("/metrics", promhttp.Handler())
-			err := http.ListenAndServe(metricsListen, handler)
-			if err != nil {
-				logger.WithError(err).Errorln("unable to start metrics listener")
+			listenErr := http.ListenAndServe(metricsListen, handler)
+			if listenErr != nil {
+				logger.WithError(listenErr).Errorln("unable to start metrics listener")
 			}
 		}()
 	}

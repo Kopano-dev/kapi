@@ -115,10 +115,8 @@ func New(name string, upstreamURIs []string, configuration *Configuration) (prox
 		return nil, err
 	}
 
-	proxy := &caddyproxy.Proxy{
+	return makeProxyHandler(configuration, &caddyproxy.Proxy{
 		Next:      nil,
 		Upstreams: upstreams,
-	}
-
-	return makeProxyHandler(configuration, proxy)
+	})
 }

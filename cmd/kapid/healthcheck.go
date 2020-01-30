@@ -99,11 +99,11 @@ func healthcheck(cmd *cobra.Command, args []string) error {
 
 	if response.StatusCode != http.StatusOK {
 		bodyBytes, _ := ioutil.ReadAll(response.Body)
-		fmt.Fprintf(os.Stderr, string(bodyBytes))
+		fmt.Fprint(os.Stderr, string(bodyBytes))
 
 		return fmt.Errorf("healthcheck failed with status: %v", response.StatusCode)
 	} else {
-		fmt.Fprintf(os.Stdout, "healthcheck successfull\n")
+		fmt.Fprint(os.Stdout, "healthcheck successful\n")
 	}
 
 	return nil

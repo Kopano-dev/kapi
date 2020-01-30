@@ -129,7 +129,7 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 // AddContext adds the accociated server context with cancel to the the provided
 // httprouter.Handle. When the handler is done, the per Request context is
-// cancelled.
+// canceled.
 func (s *Server) AddContext(parent context.Context, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// Create per request context.

@@ -31,14 +31,13 @@ const (
 
 // KCIDFromClaims extracts extra Kopano Connect identified claims from the
 // provided extra claims.
-func KCIDFromClaims(claims *kcoidc.ExtraClaimsWithType) (string, string) {
+func KCIDFromClaims(claims *kcoidc.ExtraClaimsWithType) (kcIDUserID, kcIDUsername string) {
 	if identityClaims, _ := (*claims)[IdentityClaim].(map[string]interface{}); identityClaims != nil {
-		kcIDUserID, _ := identityClaims[IdentifiedUserIDClaim].(string)
-		kcIDUsername, _ := identityClaims[IdentifiedUsernameClaim].(string)
-		return kcIDUserID, kcIDUsername
+		kcIDUserID, _ = identityClaims[IdentifiedUserIDClaim].(string)
+		kcIDUsername, _ = identityClaims[IdentifiedUsernameClaim].(string)
 	}
 
-	return "", ""
+	return kcIDUserID, kcIDUsername
 }
 
 // KCAuthorizedScopesFromClaims authorize scopes as bool map from the provided

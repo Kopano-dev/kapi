@@ -56,7 +56,7 @@ func (s *Server) AccessTokenRequired(next http.Handler, requiredScopes []string)
 			authenticatedUserID, standardClaims, extraClaims, err = s.provider.ValidateTokenString(req.Context(), authHeader[1])
 
 		default:
-			err = errors.New("Bearer authorization required")
+			err = errors.New("bearer authorization required")
 		}
 
 		if err == nil {

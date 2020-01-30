@@ -127,7 +127,7 @@ func (p *PubsPlugin) handleWebhookPublish(ctx context.Context, rw http.ResponseW
 		return nil
 	}
 
-	//p.srv.Logger().WithField("topic", tokenData.Topic).Debugf("pubs: webhook data received %s", msg)
+	// p.srv.Logger().WithField("topic", tokenData.Topic).Debugf("pubs: webhook data received %s", msg)
 
 	info, err := PrettyJSON(&streamTopicDefinition{
 		Ref:    tokenData.ID,
@@ -137,7 +137,7 @@ func (p *PubsPlugin) handleWebhookPublish(ctx context.Context, rw http.ResponseW
 		return err
 	}
 
-	envelope, _ := vars["envelope"]
+	envelope := vars["envelope"]
 	if envelope != "" {
 		// Add JSON envelope.
 		// FIXME(longsleep): This can create invalid JSON based on the provided data.
@@ -151,7 +151,7 @@ func (p *PubsPlugin) handleWebhookPublish(ctx context.Context, rw http.ResponseW
 		Info: info,
 	})
 	if err != nil {
-		// Return a bad request when stuff cannot be marshalled as JSON as this usually
+		// Return a bad request when stuff cannot be marshaled as JSON as this usually
 		// means that the JSON payload received from the webhook request is invalid.
 		p.srv.Logger().WithError(err).WithField("id", tokenData.ID).Warnln("pubs: webhook publish failed to marshal")
 		http.Error(rw, "", http.StatusBadRequest)

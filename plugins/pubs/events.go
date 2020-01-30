@@ -40,7 +40,7 @@ func (p *PubsPlugin) OnDisconnect(c *connection.Connection) error {
 // OnBeforeDisconnect is called before a connection is closed. An indication why
 // the connection will be closed is provided with the passed error.
 func (p *PubsPlugin) OnBeforeDisconnect(c *connection.Connection, err error) error {
-	//p.srv.Logger().Debugln("pubs: stream websocket OnBeforeDisconnect")
+	// p.srv.Logger().Debugln("pubs: stream websocket OnBeforeDisconnect")
 
 	return nil
 }
@@ -48,7 +48,7 @@ func (p *PubsPlugin) OnBeforeDisconnect(c *connection.Connection, err error) err
 // OnText is called when the provided connection received a text message. The
 // message payload is provided as []byte in the msg parameter.
 func (p *PubsPlugin) OnText(c *connection.Connection, msg []byte) error {
-	//p.srv.Logger().Debugf("websocket OnText: %s", msg)
+	// p.srv.Logger().Debugf("websocket OnText: %s", msg)
 
 	var envelope streamEnvelope
 	err := json.Unmarshal(msg, &envelope)
@@ -56,7 +56,6 @@ func (p *PubsPlugin) OnText(c *connection.Connection, msg []byte) error {
 		return err
 	}
 
-	err = nil
 	switch envelope.Type {
 	case streamEnvelopeTypeNameSub:
 		fallthrough
