@@ -7,11 +7,11 @@ from datetime import datetime, timedelta
 import json
 import os
 
-from molotov import scenario, setup, global_setup, global_teardown, teardown, set_var, get_var, json_request
+import molotov
 
 
 _API = os.environ.get('KAPID_URL', 'http://127.0.0.1:8039')
-_GCAPI = '%s/api/gc/v0' % _API
+_GCAPI = '%s/api/gc/v1' % _API
 _HEADERS = {
     'X-Request-With-Molotov': '1'
 }
@@ -23,35 +23,25 @@ def last_day_of_month(any_day):
     return next_month - timedelta(days=next_month.day)
 
 
-@global_setup()
+@molotov.global_setup()
 def init_test(args):
     _HEADERS['Authorization'] = "Bearer %s" % _ACCESS_TOKEN
-    me = json_request("%s/me" % _GCAPI, headers=_HEADERS)['content']
-    set_var('me', me)
+    me = molotov.json_request("%s/me" % _GCAPI, headers=_HEADERS)['content']
+    molotov.set_var('me', me)
 
 
-@global_teardown()
-def end_test():
-    pass
-
-
-@setup()
+@molotov.setup()
 async def init_worker(worker_num, args):
     return {'headers': _HEADERS}
 
 
-@teardown()
-def end_worker(worker_num):
-    pass
-
-
-@scenario(weight=5)
+@molotov.scenario(weight=5)
 async def scenario_healthcheck(session):
     async with session.get("%s/health-check" % _API) as resp:
         assert resp.status == 200, "HTTP response status: %d" % resp.status
 
 
-@scenario(weight=10)
+@molotov.scenario(weight=10)
 async def scenario_gc_me(session):
     async with session.get("%s/me" % _GCAPI) as resp:
         assert resp.status == 200, "HTTP response status: %d" % resp.status
@@ -60,7 +50,7 @@ async def scenario_gc_me(session):
         assert res.get('userPrincipalName', '') != ''
 
 
-@scenario(weight=50)
+@molotov.scenario(weight=50)
 async def scenario_gc_me_mailFolders(session):
     async with session.get("%s/me/mailFolders" % _GCAPI) as resp:
         assert resp.status == 200, "HTTP response status: %d" % resp.status
@@ -68,7 +58,7 @@ async def scenario_gc_me_mailFolders(session):
         assert res.get('@odata.context', '').endswith('/me/mailFolders')
 
 
-@scenario(weight=50)
+@molotov.scenario(weight=50)
 async def scenario_gc_me_messages(session):
     async with session.get("%s/me/messages" % _GCAPI) as resp:
         assert resp.status == 200, "HTTP response status: %d" % resp.status
@@ -76,7 +66,7 @@ async def scenario_gc_me_messages(session):
         assert res.get('@odata.context', '').endswith('/me/messages')
 
 
-@scenario(weight=20)
+@molotov.scenario(weight=20)
 async def scenario_gc_me_calendar_calendarView(session):
     startDateTime = (datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)).replace(day=1)
     endDateTime = last_day_of_month(datetime.now().replace(day=28, hour=0, minute=0, second=0, microsecond=0) + timedelta(days=4))
@@ -87,9 +77,9 @@ async def scenario_gc_me_calendar_calendarView(session):
         assert res.get('@odata.context', '').endswith('/me/calendar/calendarView')
 
 
-@scenario(weight=30)
+@molotov.scenario(weight=30)
 async def scenario_gc_me_sendMail(session):
-    me = get_var('me')
+    me = molotov.get_var('me')
     now = datetime.now()
     data = {
         'message': {
