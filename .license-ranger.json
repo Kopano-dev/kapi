@@ -1,7 +1,8 @@
 {
-	"mode": "mod",
+	"mode": "mod-vendor",
 	"header": "# Kopano API 3rd party notices\n\nCopyright 2019 Kopano and its licensors. See LICENSE.txt for license information. This document contains a list of open source components used in this project.\n",
 	"manual": {
-		"github.com/marten-seemann/chacha20": "README.md"
+		"github.com/marten-seemann/chacha20": "README.md",
+		"github.com/marten-seemann/chacha20/internal/subtle": "../../README.md"
 	}
 }
