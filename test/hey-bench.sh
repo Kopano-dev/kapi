@@ -1,4 +1,5 @@
 #!/bin/sh
+# https://github.com/rakyll/hey
 
 set -ex
 
@@ -7,4 +8,6 @@ if [ -z "$TOKEN_VALUE" ]; then
 	exit 1
 fi
 
-exec hey -H "Authorization: Bearer $TOKEN_VALUE" $@
+HEY=${HEY:-hey}
+
+exec $HEY -H "Authorization: Bearer $TOKEN_VALUE" $@
