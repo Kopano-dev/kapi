@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+
+
+## v0.15.0 (2020-05-06)
+
+- Improve example bench helpers
+- Update 3rd party depdencies
+- Update license ranger and generate 3rd party licenses from vendor folder
+- Build with Go 1.14
+- Add molotov for meet and calendar
+- Fix a bunch of linter warnings
 - Move plugins directly into daemon binary
 - Update dependencies
 - Update third party dependencies
