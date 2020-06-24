@@ -2,9 +2,10 @@
 
 ## Unreleased
 
+- Build with Go 1.14.4
 
 
-## v0.15.0 (2020-05-06)
+## v0.15.0 (2020-06-04)
 
 - Improve example bench helpers
 - Update 3rd party depdencies
