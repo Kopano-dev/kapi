@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+
+
+## v0.15.1 (2020-10-27)
+
+- Build with Go 1.14.10
+- Add client secret support to test scripts
+- Move Jenkins pipleline to warnings-ng plugin
+- Fix compatibility with Go 1.15
 - Build with Go 1.14.4
 
 
