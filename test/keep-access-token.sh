@@ -25,6 +25,7 @@
 #
 #  ISS            : OpenID Connect Identifier
 #  CLIENT_ID      : Client ID as known to the OpenID Connect Identifier
+#  CLIENT_SECRET  : Client secret for client ID (optional)
 #  REFRESH_TOKEN  : Refresh Token from the OpenID Connect Identifier
 #
 # Note that the REFRESH_TOKEN must be issues must have a matching for the
@@ -54,7 +55,7 @@ if [ -z "$tokenEndpoint" ]; then
 	return
 fi
 
-response=$(curl -sSk $tokenEndpoint --data "grant_type=refresh_token&refresh_token=$REFRESH_TOKEN_VALUE&client_id=$CLIENT_ID")
+response=$(curl -sSk $tokenEndpoint --data "grant_type=refresh_token&refresh_token=$REFRESH_TOKEN_VALUE&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET")
 echo $response | jq .
 accessTokenValue=$(echo "$response"|jq -r .access_token)
 if [ -z "$accessTokenValue" -o "$accessTokenValue" = "null" ]; then
