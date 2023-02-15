@@ -5,7 +5,6 @@ go 1.13
 require (
 	github.com/Microsoft/go-winio v0.4.14 // indirect
 	github.com/caddyserver/caddy v1.0.5
-	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/cskr/pubsub v1.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/distribution v2.7.1+incompatible // indirect
@@ -23,10 +22,9 @@ require (
 	github.com/miekg/dns v1.1.27 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/orcaman/concurrent-map v0.0.0-20190826125027-8c72a8bb44f6
-	github.com/prometheus/client_golang v1.2.1
-	github.com/prometheus/procfs v0.0.10 // indirect
+	github.com/prometheus/client_golang v1.11.1
 	github.com/rs/cors v1.7.0
-	github.com/sirupsen/logrus v1.4.2
+	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v0.0.6
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/mcuadros/go-syslog.v2 v2.3.0 // indirect
