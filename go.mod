@@ -9,7 +9,7 @@ require (
 	github.com/cskr/pubsub v1.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/distribution v2.7.1+incompatible // indirect
-	github.com/docker/docker v1.13.1 // indirect
+	github.com/docker/docker v20.10.24+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
@@ -21,7 +21,10 @@ require (
 	github.com/longsleep/go-metrics v0.0.0-20191013204616-cddea569b0ea
 	github.com/mattn/go-sqlite3 v1.13.0
 	github.com/miekg/dns v1.1.27 // indirect
+	github.com/moby/term v0.0.0-20221205130635-1aeaba878587 // indirect
+	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
+	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/orcaman/concurrent-map v0.0.0-20190826125027-8c72a8bb44f6
 	github.com/prometheus/client_golang v1.2.1
 	github.com/prometheus/procfs v0.0.10 // indirect
@@ -31,6 +34,7 @@ require (
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/mcuadros/go-syslog.v2 v2.3.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
+	gotest.tools/v3 v3.4.0 // indirect
 	stash.kopano.io/kc/libkcoidc v0.8.1
 	stash.kopano.io/kgol/oidc-go v0.3.1 // indirect
 	stash.kopano.io/kgol/rndm v1.1.0
